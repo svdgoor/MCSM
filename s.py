@@ -1,5 +1,6 @@
 import os, shutil
 autoClean = True
+flags = "-Xms4G -Xmx4G"
 javaPaths = {
     11: "C:\Program Files\Java\jdk-11.0.10\\bin\java.exe",
     16: "C:\Program Files\Java\jdk-16.0.1\\bin\java.exe"
@@ -168,7 +169,7 @@ class Version:
         The built command
     """
     def buildRunCommand(self, inMainDir = True):
-        return 'cmd /k ""' + self.java.path + '" -Xms4G -Xmx4G -jar active-' + self.path.split("\\")[-1] + ' nogui"'
+        return 'cmd /k ""' + self.java.path + '" ' + flags + ' -jar active-' + self.path.split("\\")[-1] + ' nogui"'
     
     """
     Runs this version
