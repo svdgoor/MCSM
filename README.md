@@ -26,11 +26,12 @@ You can there also remove and add files from the blacklists (the files that are 
 By default, Server Manager uses the following flags: `-Xms4G -Xmx4G`. You can modify these by editing the `flags` variable in `s.py`
 
 ## Add server jar
-You put any server `.jar` in the `*/versions` folder and it'll show up after running the startup `x.bat`.
-You do not have to rename them.
+To add a new server version, add any server `.jar` to the `*/versions` folder. 
+It will then show up after running the startup `x.bat`.
+You do not have to rename server jars.
 
 ## Running
 You can run Server Manager by either running the `x.bat` file.
 You can also open the command prompt and use `x`, `./x` or `py s.py`.
-You will be prompted to select a version
-Upon selection, the server will run
+You will be prompted to select a version.
+Upon selection, the server will run.
