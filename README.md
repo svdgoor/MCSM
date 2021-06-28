@@ -16,9 +16,9 @@ By default, Server Manager uses the following paths:
 You can modify these in `s.py` by modifying the paths in the `javaPaths` dictionary. Ensure to use `\\` for directories.
 
 #### Wiping
-By default, Server Manager wipes your server clean every time you launch
-Wiping clean means removing any temporary file (worlds, logs, crashlogs, etc.)
-it keeps your plugin configs, `eula`, `spigot/bukkit/paper/etc.yml`
+By default, Server Manager wipes your server clean every time you launch.
+Wiping clean means removing any temporary file (worlds, logs, crashlogs, etc.).
+it keeps your plugin configs, `eula`, `spigot/bukkit/paper/etc.yml`.
 You can disable that easily by going into `s.py`, and replacing `clean = True` with `clean = False`.
 You can there also remove and add files from the blacklists (the files that are removed), right below, under `cleanfolders` and `cleanfiles`.
 
