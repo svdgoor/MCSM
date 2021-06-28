@@ -1,5 +1,5 @@
 import os, shutil
-autoClean = False
+clean = False
 flags = "-Xms4G -Xmx4G"
 javaPaths = {
     11: "C:\Program Files\Java\jdk-11.0.10\\bin\java.exe",
@@ -34,7 +34,7 @@ cleanfiles = [
 """
 Cleans the server directory
 """
-def clean():
+def cleanServer():
     for folder in cleanfolders:
         shutil.rmtree(folder, True)
     for file in cleanfiles:
@@ -347,8 +347,7 @@ class Versions:
         return [0, len(self.versions) - 1]
 
 if __name__ == "__main__":
-    if autoClean or input("Would you like to clean? [Y, y, Yes, yes]") in ["Y", "y", "Yes", "yes"]:
-        clean()
+    if clean: cleanServer()
     versions = Versions([])
     versions.resetActiveVersion(False)
     versions.addAll(indexVersions())
