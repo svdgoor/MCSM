@@ -12,6 +12,7 @@
 
 ## Install
 To install, just unzip [this](https://github.com/CocoTheOwner/Server-Manager/archive/refs/heads/main.zip) in your main server directory.
+You will also need a version of [Python](https://www.python.org/). To make this, I used [Python 3.9.5](https://www.python.org/ftp/python/3.9.5/python-3.9.5-amd64.exe).
 
 ## Configuration
 There are 3 parts to confiugure
