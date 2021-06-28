@@ -1,5 +1,5 @@
 # Minecraft Server Manager
- A manager for using many different server versions
+A manager for using many different server versions
  
 ## Benefits & features
 - No need to rename jarfiles
