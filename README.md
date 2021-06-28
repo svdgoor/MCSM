@@ -1,5 +1,14 @@
 # Minecraft Server Manager
  A manager for using many different server versions
+ 
+## Benefits & features
+- No need to rename jarfiles
+- No need to change startup batches for a jarfile
+- No need to have multiple batch files for different versions
+- No more hassle with switching java versions
+- Full server wiping options & configurability
+- Startup flag support
+- Easy configurability through Json
 
 ## Install
 To install, just unzip [this](https://github.com/CocoTheOwner/Server-Manager/archive/refs/heads/main.zip) in your main server directory.
