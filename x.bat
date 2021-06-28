@@ -1,1 +1,1 @@
-py SM.py
+py server-manager.py

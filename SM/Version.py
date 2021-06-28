@@ -1,4 +1,4 @@
-from Java import Java
+from java import Java
 from util import getJarFiles
 import os
 class Version:

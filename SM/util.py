@@ -1,34 +1,50 @@
-import os, shutil
-from Versions import Versions
-from Version import Version
-from Java import Java
+import os, shutil, json
+from versionCollection import VersionCollection
+from version import Version
+from java import Java
 
 # These are the folders and (below) the files
 # that are wiped when the clean() task is ran
-cleanfolders = [
-    "./crash-reports",
-    "./logs",
-    "./w",
-    "./v",
-    "./x",
-    "./y",
-    "./z",
-    "./world",
-    "./world_nether",
-    "./world_the_end"
-]
-cleanfiles = [
-    "version_history.json",
-    ".console_history",
-    "banned-ips.json",
-    "banned-players.json",
-    "commands.yml",
-    "help.yml",
-    "permissions.yml",
-    "wepif.yml",
-    "whitelist.json",
-    "usercache.json"
-]
+# This is the file location and default configuration for the config file
+config = "SM/config.json"
+dConfig = {
+    "clean": True,
+    "flags": "-Xms4G -Xmx4G",
+    "javaPaths": {
+        11: "C:\Program Files\Java\jdk-11.0.10\\bin\java.exe",
+        16: "C:\Program Files\Java\jdk-16.0.1\\bin\java.exe"
+    },
+    "cleanfolders": [
+        "./crash-reports",
+        "./logs",
+        "./w",
+        "./v",
+        "./x",
+        "./y",
+        "./z",
+        "./world",
+        "./world_nether",
+        "./world_the_end"
+    ],
+    "cleanfiles": [
+        "version_history.json",
+        ".console_history",
+        "banned-ips.json",
+        "banned-players.json",
+        "commands.yml",
+        "help.yml",
+        "permissions.yml",
+        "wepif.yml",
+        "whitelist.json",
+        "usercache.json"
+    ]
+}
+
+"""
+Runs the manager from a config file
+"""
+def runConfig(config: dict):
+    defaultRun(config[0], config[1], config[2], config[3], config[4])
 
 """
 Runs the manager
@@ -39,18 +55,41 @@ def defaultRun(
             16: "C:\Program Files\Java\jdk-16.0.1\\bin\java.exe"
         }, 
         flags = "-Xms4G -Xmx4G", 
-        autoClean = False
+        clean = False,
+        cleanFolders = [
+            "./crash-reports",
+            "./logs",
+            "./w",
+            "./v",
+            "./x",
+            "./y",
+            "./z",
+            "./world",
+            "./world_nether",
+            "./world_the_end"
+        ],
+        cleanFiles = [
+            "version_history.json",
+            ".console_history",
+            "banned-ips.json",
+            "banned-players.json",
+            "commands.yml",
+            "help.yml",
+            "permissions.yml",
+            "wepif.yml",
+            "whitelist.json",
+            "usercache.json"
+        ]
     ):
 
-    # Ask for clean if autoclean is off
-    if autoClean or input("Would you like to clean? [Y, y, Yes, yes]") in ["Y", "y", "Yes", "yes"]:
-        clean()
+    # Clean if clean is enabled
+    if clean: cleanServer(cleanFolders, cleanFiles)
 
     # Store the java paths
     Java.javaPaths = javaPaths
 
     # Create versions object
-    versions = Versions([])
+    versions = VersionCollection()
 
     # Reset previously active jar
     versions.resetActiveVersion(False)
@@ -62,9 +101,26 @@ def defaultRun(
     versions.askSelect(True).run(flags)
 
 """
+Retrieve the configuration and set a default if the file does not yet exist
+
+Returns:
+    An array with the javaPath, flags, clean, cleanFolders, and cleanFiles values in order
+"""
+def getResetConfig():
+    if not os.path.exists(config):
+        with open(config, "w") as f:
+            json.dump(dConfig, f)
+        print("Created default config at " + config + ".")
+
+    with open(config) as f:
+        data = json.load(f)
+
+    return [data["javaPath"], data["flags"], data["clean"], data["cleanFolders"], data["cleanFiles"]]
+
+"""
 Cleans the server directory
 """
-def clean():
+def cleanServer(cleanfolders: list, cleanfiles: list):
     for folder in cleanfolders:
         shutil.rmtree(folder, True)
     for file in cleanfiles:
