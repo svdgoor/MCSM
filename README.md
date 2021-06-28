@@ -8,7 +8,7 @@
 - No more hassle with switching java versions
 - Full server wiping options & configurability
 - Startup flag support
-- Easy configurability through Json
+- Easy configurability
 
 ## Install
 To install, just unzip [this](https://github.com/CocoTheOwner/Server-Manager/archive/refs/heads/main.zip) in your main server directory.
