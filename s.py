@@ -1,5 +1,5 @@
 import os, shutil
-autoClean = True
+autoClean = False
 flags = "-Xms4G -Xmx4G"
 javaPaths = {
     11: "C:\Program Files\Java\jdk-11.0.10\\bin\java.exe",
