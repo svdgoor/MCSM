@@ -3,45 +3,68 @@ from Versions import Versions
 from Version import Version
 from Java import Java
 
+# These are the folders and (below) the files
+# that are wiped when the clean() task is ran
+cleanfolders = [
+    "./crash-reports",
+    "./logs",
+    "./w",
+    "./v",
+    "./x",
+    "./y",
+    "./z",
+    "./world",
+    "./world_nether",
+    "./world_the_end"
+]
+cleanfiles = [
+    "version_history.json",
+    ".console_history",
+    "banned-ips.json",
+    "banned-players.json",
+    "commands.yml",
+    "help.yml",
+    "permissions.yml",
+    "wepif.yml",
+    "whitelist.json",
+    "usercache.json"
+]
+
 """
 Runs the manager
 """
-def defaultRun(flags = "-Xms4G -Xmx4G", autoClean = False):
+def defaultRun(
+        javaPaths = {
+            11: "C:\Program Files\Java\jdk-11.0.10\\bin\java.exe",
+            16: "C:\Program Files\Java\jdk-16.0.1\\bin\java.exe"
+        }, 
+        flags = "-Xms4G -Xmx4G", 
+        autoClean = False
+    ):
+
+    # Ask for clean if autoclean is off
     if autoClean or input("Would you like to clean? [Y, y, Yes, yes]") in ["Y", "y", "Yes", "yes"]:
         clean()
+
+    # Store the java paths
+    Java.javaPaths = javaPaths
+
+    # Create versions object
     versions = Versions([])
+
+    # Reset previously active jar
     versions.resetActiveVersion(False)
+
+    # Index jars
     versions.addAll(indexVersions())
+
+    # Ask for selecting and run a jar
     versions.askSelect(True).run(flags)
 
 """
 Cleans the server directory
 """
 def clean():
-    cleanfolders = [
-        "./crash-reports",
-        "./logs",
-        "./w",
-        "./v",
-        "./x",
-        "./y",
-        "./z",
-        "./world",
-        "./world_nether",
-        "./world_the_end"
-    ]
-    cleanfiles = [
-        "version_history.json",
-        ".console_history",
-        "banned-ips.json",
-        "banned-players.json",
-        "commands.yml",
-        "help.yml",
-        "permissions.yml",
-        "wepif.yml",
-        "whitelist.json",
-        "usercache.json"
-    ]
     for folder in cleanfolders:
         shutil.rmtree(folder, True)
     for file in cleanfiles:
