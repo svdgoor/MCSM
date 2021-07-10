@@ -1,35 +1,64 @@
-import os, shutil
-clean = False
-flags = "-Xms4G -Xmx4G"
-javaPaths = {
-    11: "C:\Program Files\Java\jdk-11.0.10\\bin\java.exe",
-    16: "C:\Program Files\Java\jdk-16.0.1\\bin\java.exe"
-}
-cleanfolders = [
-    "./crash-reports",
-    "./logs",
-    "./w",
-    "./v",
-    "./x",
-    "./y",
-    "./z",
-    "./world",
-    "./world_nether",
-    "./world_the_end"
-]
-cleanfiles = [
-    "version_history.json",
-    ".console_history",
-    "banned-ips.json",
-    "banned-players.json",
-    "commands.yml",
-    "help.yml",
-    "permissions.yml",
-    "wepif.yml",
-    "whitelist.json",
-    "usercache.json"
-]
+import os, shutil, json
 
+
+"""
+Resets the config file specified
+
+"""
+def resetConfig(configFile: str):
+    with open(configFile, "w") as f:
+            f.write(json.dumps({
+                "clean": False,
+                "flags": "-Xms4G -Xmx4G",
+                "javaPaths": {
+                    11: "C:\Program Files\Java\jdk-11.0.10\\bin\java.exe",
+                    16: "C:\Program Files\Java\jdk-16.0.1\\bin\java.exe"
+                },
+                "cleanfolders": [
+                    "./crash-reports",
+                    "./logs",
+                    "./w",
+                    "./v",
+                    "./x",
+                    "./y",
+                    "./z",
+                    "./world",
+                    "./world_nether",
+                    "./world_the_end"
+                ],
+                "cleanfiles": [
+                    "version_history.json",
+                    ".console_history",
+                    "banned-ips.json",
+                    "banned-players.json",
+                    "commands.yml",
+                    "help.yml",
+                    "permissions.yml",
+                    "wepif.yml",
+                    "whitelist.json",
+                    "usercache.json"
+                ]
+            }, indent=4))
+
+configFile = "servermanager.json"
+if not os.path.exists("./" + configFile):
+    resetConfig(configFile)
+data = None
+with open(configFile, "r") as f:
+    data = json.load(f)
+for dataTag in ["clean", "flags", "javaPaths", "cleanfolders", "cleanfiles"]:
+    if not dataTag in data:
+        resetConfig(configFile)
+        with open(configFile, "r") as f:
+            data = json.load(f)
+        break
+
+clean = data["clean"]
+flags = data["flags"]
+javaPaths = data["javaPaths"]
+cleanfolders = data["cleanfolders"]
+cleanfiles = data ["cleanfiles"]
+print("Loaded config")
 
 """
 Cleans the server directory
@@ -97,11 +126,13 @@ def indexVersions():
 
 class Java:
     paths = javaPaths
+    version = None
+    path = None
     def __init__(self, java: int):
-        if java not in self.paths:
+        if str(java) not in self.paths:
             print("Java {} is not in the java path list!".format(java))
             return
-        self.path = self.paths[java]
+        self.path = self.paths[str(java)]
         self.version = java
 
 class Version:
