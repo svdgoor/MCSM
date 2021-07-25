@@ -7,38 +7,49 @@ Resets the config file specified
 """
 def resetConfig(configFile: str):
     with open(configFile, "w") as f:
-            f.write(json.dumps({
-                "clean": False,
-                "flags": "-Xms4G -Xmx4G",
-                "javaPaths": {
-                    11: "C:\Program Files\Java\jdk-11.0.10\\bin\java.exe",
-                    16: "C:\Program Files\Java\jdk-16.0.1\\bin\java.exe"
-                },
-                "cleanfolders": [
-                    "./crash-reports",
-                    "./logs",
-                    "./w",
-                    "./v",
-                    "./x",
-                    "./y",
-                    "./z",
-                    "./world",
-                    "./world_nether",
-                    "./world_the_end"
-                ],
-                "cleanfiles": [
-                    "version_history.json",
-                    ".console_history",
-                    "banned-ips.json",
-                    "banned-players.json",
-                    "commands.yml",
-                    "help.yml",
-                    "permissions.yml",
-                    "wepif.yml",
-                    "whitelist.json",
-                    "usercache.json"
-                ]
-            }, indent=4))
+        f.write(json.dumps({
+            "clean": False,
+            "flags": "-Xms4G -Xmx4G",
+            "javaPaths": {
+                "11": "C:\\Program Files\\Java\\jdk-11.0.10\\bin\\java.exe",
+                "16": "C:\\Program Files\\Java\\jdk-16.0.1\\bin\\java.exe"
+            },
+            "cleanfolders": [
+                "./crash-reports",
+                "./logs",
+                "./w",
+                "./v",
+                "./x",
+                "./y",
+                "./z",
+                "./k",
+                "./l",
+                "./o",
+                "./world/advancements",
+                "./world/data",
+                "./world/entities",
+                "./world/playerdata",
+                "./world/poi",
+                "./world/region",
+                "./world/stats"
+            ],
+            "cleanfiles": [
+                "version_history.json",
+                ".console_history",
+                "banned-ips.json",
+                "banned-players.json",
+                "commands.yml",
+                "help.yml",
+                "permissions.yml",
+                "wepif.yml",
+                "whitelist.json",
+                "usercache.json",
+                "./world/level.dat",
+                "./world/level.dat_old",
+                "./world/session.lock",
+                "./world/uid.dat"
+            ]
+        }, indent=4))
 
 configFile = "servermanager.json"
 if not os.path.exists("./" + configFile):
