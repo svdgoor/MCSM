@@ -366,7 +366,7 @@ class Versions:
         True if valid
     """
     def getValidSelection(self, selection: int):
-        return selection > 0 and selection < len(self.versions)
+        return selection >= 0 and selection < len(self.versions)
 
     """
     Get the selection bounds
@@ -375,7 +375,7 @@ class Versions:
         The possible selection bounds
     """
     def getSelectionBounds(self):
-        return [0, len(self.versions) - 1]
+        return [0, len(self.versions) - 1] if 0 != len(self.versions) else 0
 
 if __name__ == "__main__":
     if clean: cleanServer()
