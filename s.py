@@ -93,7 +93,7 @@ def getConfig(configFile: str):
     config = None
     with open(configFile, "r") as file:
         configJson = json.load(file)
-        for dataTag in ["clean", "flags", "javaPaths", "cleanfolders", "cleanfiles"]:
+        for dataTag in default_settings.keys():
             if not dataTag in configJson:
                 file.close()
                 with open(configFile, "w") as f:
@@ -195,7 +195,7 @@ def check_purpur():
         print("Downloading purpur.jar from https://api.purpurmc.org/v2/purpur/1.18.1/latest/download")
         open("purpur.jar", "wb").write(requests.get("https://api.purpurmc.org/v2/purpur/1.18.1/latest/download").content)
     else:
-        print("purpur.jar found")
+        print("Found purpur.jar in the current directory")
 
 # Run the main server loop
 def boot_loop(cmd: str, config: dict):
@@ -234,7 +234,7 @@ def run():
         with open("eula.txt", "w") as f:
             f.write("eula=true")
     else:
-        print("eula.txt found")
+        print("Found eula.txt in server folder")
 
     # Check if the run.bat file exists
     if not os.path.isfile("run.bat"):
@@ -242,7 +242,7 @@ def run():
         with open("run.bat", "w") as f:
             f.write("python run.py")
     else:
-        print("run.bat found")
+        print("Found run.bat in server folder")
 
     if not os.path.isdir("plugins"):
         os.mkdir("plugins/")
