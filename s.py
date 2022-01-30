@@ -198,7 +198,7 @@ def check_purpur():
         print("purpur.jar found")
 
 # Run the main server loop
-def boot_loop(cmd: str):
+def boot_loop(cmd: str, config: dict):
         
     # Run the server
     while (True):
@@ -206,18 +206,24 @@ def boot_loop(cmd: str):
         subprocess.run(cmd, shell=True)
         print("Server stopped. Rebooting in 5 seconds. Press CTRL+C to cancel.")
         time.sleep(5)
+        if config["clean"]:
+            clean(config["cleanfolders"], config["cleanfiles"])
+
+# Cleanup directories
+def clean(folders, files):
+    for folder in folders:
+        shutil.rmtree(folder, True)
+    for file in files:
+        if os.path.exists(file):
+            os.remove(file)
 
 # Run the server
 def run():
     config = getConfig("servermanager.json")
 
     # Cleanup
-    if config["clean"]: 
-        for folder in config["cleanfolders"]:
-            shutil.rmtree(folder, True)
-        for file in config["cleanfiles"]:
-            if os.path.exists(file):
-                os.remove(file)
+    if config["clean"]:
+        clean(config["cleanfolders"], config["cleanfiles"])
 
     # Check if the jar file exists
     check_purpur()
@@ -252,7 +258,7 @@ def run():
     cmd = ["java"] + sys.argv[1:] + ["-jar", "purpur.jar", "nogui"]
 
     # Run the main server loop
-    boot_loop(cmd)
+    boot_loop(cmd, config)
 
 if __name__ == "__main__":
     run()
