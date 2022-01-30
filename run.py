@@ -233,6 +233,7 @@ def boot_loop(cmd: str, config: dict):
 
 # Cleanup directories
 def clean(folders, files):
+    print("Cleaning up directories")
     for folder in folders:
         shutil.rmtree(folder, True)
     for file in files:
