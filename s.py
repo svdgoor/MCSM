@@ -205,9 +205,9 @@ def boot_loop(cmd: str, config: dict):
         print("Starting the server: " + str(cmd))
         subprocess.run(cmd, shell=True)
         print("Server stopped. Rebooting in 5 seconds. Press CTRL+C to cancel.")
-        time.sleep(5)
         if config["clean"]:
             clean(config["cleanfolders"], config["cleanfiles"])
+        time.sleep(5)
 
 # Cleanup directories
 def clean(folders, files):
