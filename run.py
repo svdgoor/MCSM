@@ -227,7 +227,7 @@ def boot_loop(cmd: str, config: dict):
     while (True):
         print("Starting the server: " + str(cmd))
         subprocess.run(cmd, shell=True)
-        print("Server stopped. Rebooting in 5 seconds. Press CTRL+C to cancel.")
+        print("Server stopped. Rebooting in " + str(config["reboot_delay"]) + " seconds. Press CTRL+C to cancel.")
         if config["clean"]:
             clean(config["cleanfolders"], config["cleanfiles"])
         time.sleep(config["reboot_delay"])
