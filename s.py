@@ -1,396 +1,258 @@
+# Starts the minecraft server
+# 
+# Get the amount of MB ram from the system arguments, default to 1024
+# 
+# If the purpur.jar file does not exist, download it from 
+# https://api.purpurmc.org/v2/purpur/1.18.1/latest/download
+# and rename the file to purpur.jar
+#
+# If the eula.txt file does not exist, create it and add the following text:
+# eula=true
+#
+# If the run.bat file does not exist, create it and let it run this file with the ram argument
+# 
+# If the plugins/Iris.jar file does not exist and there is not a jar of the regex (Iris-).*(\.jar),
+# Ask the user to choose between:
+# 1. download the git repository from https://github.com/VolmitSoftware/Iris and run the gradlew setup task and then the gradlew Iris task
+# 2. download the jar from https://www.spigotmc.org/resources/iris-world-gen-custom-biome-colors.84586/
+# 3. skip downloading Iris (do it manually)
+# 
+# If the plugins/Rift.jar file does not exist,
+# Ask the user to choose between:
+# 1. download the jar from https://github.com/VolmitSoftware/Rift/releases/download/1.0.1/Rift-1.0.1.jar
+# 2. skip downloading Rift (do it manually)
+#
+# Run the server with the following command:
+# java -Xmx<ram>M -Xms<ram>M -jar purpur.jar nogui
+
+
+import os
+import time
+import subprocess
+import requests
+import sys
+from git import Repo
+import regex
 import os, shutil, json
 
+iris_regex = regex.compile(r'Iris-?.*\.jar')
 
-"""
-Resets the config file specified
+rift_regex = regex.compile(r'Rift-?.*\.jar')
 
-"""
-def resetConfig(configFile: str):
-    with open(configFile, "w") as f:
-        f.write(json.dumps({
-            "clean": False,
-            "flags": "-Xms4G -Xmx4G",
-            "javaPaths": {
-                "11": "C:\\Program Files\\Java\\jdk-11.0.10\\bin\\java.exe",
-                "16": "C:\\Program Files\\Java\\jdk-16.0.1\\bin\\java.exe"
-            },
-            "cleanfolders": [
-                "./crash-reports",
-                "./logs",
-                "./w",
-                "./v",
-                "./x",
-                "./y",
-                "./z",
-                "./k",
-                "./l",
-                "./o",
-                "./world/advancements",
-                "./world/data",
-                "./world/entities",
-                "./world/playerdata",
-                "./world/poi",
-                "./world/region",
-                "./world/stats"
-            ],
-            "cleanfiles": [
-                "version_history.json",
-                ".console_history",
-                "banned-ips.json",
-                "banned-players.json",
-                "commands.yml",
-                "help.yml",
-                "permissions.yml",
-                "wepif.yml",
-                "whitelist.json",
-                "usercache.json",
-                "./world/level.dat",
-                "./world/level.dat_old",
-                "./world/session.lock",
-                "./world/uid.dat"
-            ]
-        }, indent=4))
+default_settings = {
+    "clean": False,
+    "cleanfolders": [
+        "./crash-reports",
+        "./logs",
+        "./w",
+        "./v",
+        "./x",
+        "./y",
+        "./z",
+        "./k",
+        "./l",
+        "./o",
+        "./world/advancements",
+        "./world/data",
+        "./world/entities",
+        "./world/playerdata",
+        "./world/poi",
+        "./world/region",
+        "./world/stats"
+    ],
+    "cleanfiles": [
+        "version_history.json",
+        ".console_history",
+        "banned-ips.json",
+        "banned-players.json",
+        "commands.yml",
+        "help.yml",
+        "permissions.yml",
+        "wepif.yml",
+        "whitelist.json",
+        "usercache.json",
+        "./world/level.dat",
+        "./world/level.dat_old",
+        "./world/session.lock",
+        "./world/uid.dat"
+    ],
+    "rift": True,
+    "iris": True,
+    "irisRepoDir": "plugins/Iris/repo"
+}
 
-configFile = "servermanager.json"
-if not os.path.exists("./" + configFile):
-    resetConfig(configFile)
-data = None
-with open(configFile, "r") as f:
-    data = json.load(f)
-for dataTag in ["clean", "flags", "javaPaths", "cleanfolders", "cleanfiles"]:
-    if not dataTag in data:
-        resetConfig(configFile)
-        with open(configFile, "r") as f:
-            data = json.load(f)
-        break
 
-clean = data["clean"]
-flags = data["flags"]
-javaPaths = data["javaPaths"]
-cleanfolders = data["cleanfolders"]
-cleanfiles = data ["cleanfiles"]
-print("Loaded config")
-
-"""
-Cleans the server directory
-"""
-def cleanServer():
-    for folder in cleanfolders:
-        shutil.rmtree(folder, True)
-    for file in cleanfiles:
-        if os.path.exists(file):
-            os.remove(file)
-
-"""
-Retrieves all jar file names from <working-directory>/versions
-
-Returns:
-    Array of filenames
-"""
-def getJarFiles(prefixPath = False, checkVersionsFolder = True):
-
-    # Retrieve the versions directory path
-    path = "\\".join(__file__.split("\\")[:-1]) + ("\\versions" if checkVersionsFolder else "")
-
-    # Store jarfiles
-    jars = []
-    for file in os.listdir(path):
-        if file.endswith(".jar"):
-            if prefixPath:
-                jars.append(path + "\\" + file)
-            else:
-                jars.append(file)
-    return jars
-
-"""
-Checks all jar files and makes versions for them
-
-Returns:
-    All server versions (jar files) found in the specified dir
-"""
-def indexVersions():
-
-    # Retrieve the versions directory path
-    path = "\\".join(__file__.split("\\")[:-1]) + "\\versions"
-
-    # Make an array of versions
-    v = []
-
-    # Loop over all jarfiles found
-    for jarFile in getJarFiles():
-
-        # Split the jarfile name
-        jarSplit = jarFile.split("-")
-
-        # Retrieve the version
-        version = int(jarSplit[1].split(".")[1])
-
-        # If the jarfile is 1.16, also add a java 11 version
-        if version == 16:
-            v.append(Version(jarSplit[0], version, path + "\\" + jarFile, Java(11)))
-
-        # Add a java 16 version
-        v.append(Version(jarSplit[0], version, path + "\\" + jarFile, Java(16)))
-
-    return v
+# Resets the config file
+def getConfig(configFile: str):
     
+    # Config path exists
+    if not os.path.exists("./" + configFile):
+        with open(configFile, "w") as f:
+            f.write(json.dumps(default_settings, indent=4))
+            return default_settings
+    config = None
+    with open(configFile, "r") as file:
+        configJson = json.load(file)
+        for dataTag in ["clean", "flags", "javaPaths", "cleanfolders", "cleanfiles"]:
+            if not dataTag in configJson:
+                file.close()
+                with open(configFile, "w") as f:
+                    f.write(json.dumps(default_settings, indent=4))
+                return default_settings
+        config = json.load(file)
 
-class Java:
-    paths = javaPaths
-    version = None
-    path = None
-    def __init__(self, java: int):
-        if str(java) not in self.paths:
-            print("Java {} is not in the java path list!".format(java))
+    print("Loaded config")
+    return config
+
+def check_iris(iris_repo_dir: str):
+    for file in os.listdir("plugins"):
+        if iris_regex.match(file):
+            print("Found " + file + " in plugins folder")
             return
-        self.path = self.paths[str(java)]
-        self.version = java
 
-class Version:
-    def __init__(self, title: str, mcversion: int, path: str, java: Java):
-        self.title = title.capitalize()
-        self.version = mcversion
-        self.path = path
-        self.java = java
+    print("Iris is not installed. Please enter how you wish to install Iris:")
+    print("1. Download the git repository and setup (~5 to 10 minutes first time, ~1 minute after)")
+    print("2. Download the jar file from spigot (~1 minute)")
+    print("3. Install Iris manually (skip)")
+    choice = input("Choice: ")
 
-    """
-    Prepares the jar to be ran
-    """
-    def prepareRun(self):
-        invf = self.isInVersionFolder()
-        if not invf and self.isInMainFolder():
-            print("Already prepared version!")
-            return None
-        elif not invf:
-            print("File not in main and not in version folder!")
-            return None
-        self.moveToMain()
-        if not self.isInMainFolder():
-            print("Moving self to main failed!")
-            return None
-        return self.path
+    if choice == "2":
+        # Open https://www.spigotmc.org/resources/iris-world-gen-custom-biome-colors.84586/
+        # and download the jar file
+        print("Download the jar file from https://www.spigotmc.org/resources/iris-world-gen-custom-biome-colors.84586/")
+        print("and move it to the plugins folder")
+        print("and run this script again")
+        # Open the webbrowser with the website
+        time.sleep(1)
+        os.system("start https://www.spigotmc.org/resources/iris-world-gen-custom-biome-colors.84586/")
+        exit(0)
 
-    """
-    Checks if this version is still in the versions folder
+    if choice != "1":
+        print("Skipping Iris")
+        return
+
+    print("Cloning Iris from github")
     
-    Returns:
-        True if this version is still in the versions folder
-    """
-    def isInVersionFolder(self):
-        # print("Checking if in server folder: " + self.path)
-        return self.path in getJarFiles(True)
+    print("Using repodir: " + iris_repo_dir)
 
-    """
-    Checks if this version is in the main server directory
+    # Check if the repo exists
+    if not os.path.isdir(iris_repo_dir):
+        os.makedirs(iris_repo_dir)
+        print("Setting up Iris repo")
+        repo = Repo.clone_from("https://github.com/VolmitSoftware/Iris.git", iris_repo_dir)
+        print("Cloned repository")
+        repo.git.checkout("master")
+        print("Checked out master")
+        repo.git.pull()
+        print("Pulled latest changes")
 
-    Returns:
-        True if this version is in the main server directory
-    """
-    def isInMainFolder(self):
-        # print("Checking if in main directory: " + self.path.replace("\\versions", ""))
-        return self.path.replace("versions\\", "active-") in getJarFiles(True, False)
-
-    """
-    Moves this version to the main directory
-    """
-    def moveToMain(self):
-        # print("Moving to main: " + self.path)
-        os.rename(self.path, self.path.replace("versions\\", "active-"))
-
-    """
-    Moves this version to the versions directory
-    """
-    def moveToVersions(self):
-        # print("Moving to versions: " + self.path.replace("\\versions", ""))
-        os.rename(self.path.replace("versions\\", "active-"), self.path)
-
-    """
-    Builds a server run command
-
-    Returns:
-        The built command
-    """
-    def buildRunCommand(self, inMainDir = True):
-        return 'cmd /k ""' + self.java.path + '" ' + flags + ' -jar active-' + self.path.split("\\")[-1] + ' nogui"'
+    # Run the gradlew setup task
+    if (not os.path.isdir(iris_repo_dir + "/build/buildtools/CraftBukkit")):
+        print("Please make sure you have the CraftBukkit buildtools installed and setup") 
+        input("Press enter to run the gradlew setup task. This script thinks it's not installed.")
+        subprocess.run("cd " + iris_repo_dir + " && gradlew setup", shell=True)
     
-    """
-    Runs this version
-    """
-    def run(self):
-        self.prepareRun()
-        command = self.buildRunCommand()
-        print("Delegating command: " + command)
-        os.system(command)
-    
+    # Run the gradlew Iris task
+    subprocess.run("cd " + iris_repo_dir + " && gradlew Iris", shell=True)
 
-    """
-    Prints information about this version    
-    """
-    def print(self):
-        print(self.getInfo())
+    # Move the jar file that appeared in the build/libs directory to the plugins folder and rename it to Iris.jar
+    if (not os.path.isdir(iris_repo_dir + "/build/libs")):
+        print("Could not find the Iris.jar file in the build/libs directory")
+        print("Please make sure the build task was successful")
+        exit(1)
 
-    """
-    Gets information about this version
-    """
-    def getInfo(self, simplified: False):
-        if simplified:
-            return "1." + str(self.version) + " " + self.title + " / Java " + str(self.java.version) 
-        else:
-            return "V: 1." + str(self.version) + " " + self.title + " / Java (" + str(self.java.version) + "): " + self.java.path + " / Path: " + self.path
+    for file in os.listdir(iris_repo_dir + "/build/libs"):
+        if file.endswith(".jar"):
+            os.rename(iris_repo_dir + "/build/libs/" + file, "plugins/" + file)
+            print("Moved " + file + " to plugins folder")
+            break
 
-class Versions:
-    versions = []
-    def __init__(self, versions = []):
-        self.addAll(versions)
+# Check if the rift jar exists
+# Use regex to find the jar file, with pattern: Rift-?.*\.jar
+# If the jar file is not found, ask the user to download it from 
+# https://github.com/VolmitSoftware/Rift/releases/download/1.0.1/Rift-1.0.1.jar
+# and move it to the plugins folder
+# or to skip downloading the jar file altogether
+def check_rift():
+    rift_regex = regex.compile(r'Rift-?.*\.jar')
+    for file in os.listdir("plugins"):
+        if rift_regex.match(file):
+            print("Found " + file + " in plugins folder")
+            return
 
-    """
-    Add a version
-    """
-    def add(self, version: Version):
-        self.versions.append(version)
+    print("Rift is not installed. Please enter how you wish to install Rift:")
+    print("1. Download the jar file from github (fast, ~1 minute)")
+    print("2. Do not install rift (skip)")
+    choice = input("Choice: ")
+    if choice == "1":
+        print("Downloading Rift from github")
+        open("plugins/Rift.jar", "wb").write(requests.get("https://github.com/VolmitSoftware/Rift/releases/download/1.0.1/Rift-1.0.1.jar").content)
+        print("Downloaded rift from github")
 
-    """
-    Add a list of versions
-    """
-    def addAll(self, versions: list):
-        for version in versions:
-            if not type(version) is Version:
-                print(str(version) + " is not a version object")
-            else:
-                self.versions.append(version) 
+# Check to make sure purpur is installed
+def check_purpur():
+    if not os.path.isfile("purpur.jar"):
+        print("Downloading purpur.jar from https://api.purpurmc.org/v2/purpur/1.18.1/latest/download")
+        open("purpur.jar", "wb").write(requests.get("https://api.purpurmc.org/v2/purpur/1.18.1/latest/download").content)
+    else:
+        print("purpur.jar found")
 
-    """
-    Prints the version options
-    """
-    def print(self):
-        for i, version in enumerate(self.versions):
-            print(str(i) + ": " + version.getInfo(True))
-            
-    """
-    Checks if there is an active jarfile present
+# Run the main server loop
+def boot_loop(cmd: str):
+        
+    # Run the server
+    while (True):
+        print("Starting the server: " + str(cmd))
+        subprocess.run(cmd, shell=True)
+        print("Server stopped. Rebooting in 5 seconds. Press CTRL+C to cancel.")
+        time.sleep(5)
 
-    Returns:
-        True if there is an active jar. If returnFile is true, returns the file instead (can return none)
-    """
-    def existsActiveVersion(self, returnFile = False):
-        for jar in getJarFiles(True, False):
-            if jar.split("\\")[-1].startswith("active-"):
-                return (True if not returnFile else jar)
-        return (False if not returnFile else None)
+# Run the server
+def run():
+    config = getConfig("servermanager.json")
 
-    """
-    Resets and adds back active versions
+    # Cleanup
+    if config["clean"]: 
+        for folder in config["cleanfolders"]:
+            shutil.rmtree(folder, True)
+        for file in config["cleanfiles"]:
+            if os.path.exists(file):
+                os.remove(file)
 
-    If addVersionToList is false, the version found here will not be added
-    """
-    def resetActiveVersion(self, addVersionToList = True):
-        version = self.existsActiveVersion(True)
-        if not version == None:
-            # This renames the active jarfile to its normal name, inside the versions folder
-            # Version looks like this: `<working directory>/active-jarfile-version.jar`
-            # The target location is: `<working directory>/versions/jarfile.jar`
-            target = "\\".join(version.split("\\")[:-1]) + "\\versions\\" + version.split("\\")[-1].replace("active-", "")
-            os.rename(version, target)
-            if addVersionToList:
-                if int(target.split("\\")[-1].split("-")[1].split(".")[1]) == 16:
-                    self.add(Version(
-                        target.split("\\")[-1].split("-")[0],
-                        int(target.split("\\")[-1].split("-")[1].split(".")[1]),
-                        target,
-                        Java(11)
-                    ))   
-                self.add(Version(
-                    target.split("\\")[-1].split("-")[0],
-                    int(target.split("\\")[-1].split("-")[1].split(".")[1]),
-                    target,
-                    Java(16)
-                ))
+    # Check if the jar file exists
+    check_purpur()
 
-    """
-    Ask for a version selection
+    # Check if the eula.txt file exists
+    if not os.path.isfile("eula.txt"):
+        print("Creating eula.txt")
+        with open("eula.txt", "w") as f:
+            f.write("eula=true")
+    else:
+        print("eula.txt found")
 
-    Returns:
-        The selected version
-    """
-    def askSelect(self, includeVersions = False):
+    # Check if the run.bat file exists
+    if not os.path.isfile("run.bat"):
+        print("Creating run.bat")
+        with open("run.bat", "w") as f:
+            f.write("python run.py")
+    else:
+        print("run.bat found")
 
-        # If requested, print versions
-        if includeVersions: self.print()
+    if not os.path.isdir("plugins"):
+        os.mkdir("plugins/")
 
-        # Ask to select a version
-        print("Please select a version from the list above")
+    # Check if there is a jar of the regex (Iris-).*(\.jar)
+    if config["iris"]:
+        check_iris(config["irisRepoDir"])
 
-        # Get selection input
-        selection = input()
+    # Check if there is a jar of the regex (Rift-).*(\.jar)
+    if config["rift"]:
+        check_rift()
 
-        # Try again until a valid number was input
-        while not selection.isnumeric() or not self.getValidSelection(int(selection)):
-            if not selection.isnumeric():
-                print("You entered a non-numerical value")
-            else:
-                print("You selected a number out of bounds: " + str(self.getSelectionBounds()))
-            print("Please try again to select a version from the list above")
-            selection = input()
-        return self.versions[int(selection)]
+    cmd = ["java"] + sys.argv[1:] + ["-jar", "purpur.jar", "nogui"]
 
-    """
-    Asks to toggle looping on or off
-
-    Returns:
-        True if selected as such
-    """
-    def askLoop():
-
-        # The yes/no definitions
-        yes = ["Y", "y", "Yes", "yes"]
-        no = ["N", "n", "No", "no"]
-
-        # Ask for the yes/no input
-        print("Would you like to loop this version? (" + ", ".join(yes) + " or " + ", ".join(no) + ")")
-
-        # Retrieve yes/no input
-        loop = input()
-
-        # Loop until the entry is valid
-        while not loop in yes and not loop in no:
-            print("You did not select one of these options: " + ", ".join(yes) + " or " + ", ".join(no) + ". Please try again")
-            loop = input()
-
-        # Return the boolean value
-        return loop in yes
-
-    """
-    Asks to select a version and for a loop
-
-    Returns:
-        Array with [loop (bool), version (Version)]
-    """
-    def askSelectLoop(self):
-        version = self.askSelect(True)
-        loop = Versions.askLoop()
-        return [loop, version]
-
-    """ 
-    Checks the inputted selection
-
-    Returns:
-        True if valid
-    """
-    def getValidSelection(self, selection: int):
-        return selection >= 0 and selection < len(self.versions)
-
-    """
-    Get the selection bounds
-
-    Returns:
-        The possible selection bounds
-    """
-    def getSelectionBounds(self):
-        return [0, len(self.versions) - 1] if 0 != len(self.versions) else 0
+    # Run the main server loop
+    boot_loop(cmd)
 
 if __name__ == "__main__":
-    if clean: cleanServer()
-    versions = Versions([])
-    versions.resetActiveVersion(False)
-    versions.addAll(indexVersions())
-    versions.askSelect(True).run()
+    run()

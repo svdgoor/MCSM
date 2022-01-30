@@ -1,4 +1,8 @@
+# Ignore everything
+*
 
-*.jar
-
-*.json
+# Except for the following
+!LICENSE
+!README.md
+!s.py
+!x.bat
