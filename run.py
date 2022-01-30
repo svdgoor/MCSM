@@ -29,6 +29,7 @@
 import os
 import time
 import subprocess
+from turtle import down
 import requests
 import sys
 from git import Repo
@@ -76,9 +77,13 @@ default_settings = {
         "./world/session.lock",
         "./world/uid.dat"
     ],
-    "rift": True,
-    "iris": True,
-    "irisRepoDir": "plugins/Iris/repo"
+    "download": {
+        "use_iris": True,
+        "use_rift": True,
+        "iris_repo": "plugins/Iris/repo",
+        "iris_download_mode": -1,
+        "rift_download_mode": -1
+    }
 }
 
 
@@ -104,19 +109,21 @@ def getConfig(configFile: str):
     print("Loaded config")
     return config
 
-def check_iris(iris_repo_dir: str):
+def check_iris(download_mode: int, repo_dir: str):
     for file in os.listdir("plugins"):
         if iris_regex.match(file):
             print("Found " + file + " in plugins folder")
             return
 
-    print("Iris is not installed. Please enter how you wish to install Iris:")
-    print("1. Download the git repository and setup (~5 to 10 minutes first time, ~1 minute after)")
-    print("2. Download the jar file from spigot (~1 minute)")
-    print("3. Install Iris manually (skip)")
-    choice = input("Choice: ")
+    if (download_mode == -1):
 
-    if choice == "2":
+        print("Iris is not installed. Please enter how you wish to install Iris:")
+        print("1. Download the git repository and setup (~5 to 10 minutes first time, ~1 minute after)")
+        print("2. Download the jar file from spigot (~1 minute)")
+        print("3. Install Iris manually (skip)")
+        download_mode = input("Choice: ")
+
+    if download_mode == "2":
         # Open https://www.spigotmc.org/resources/iris-world-gen-custom-biome-colors.84586/
         # and download the jar file
         print("Download the jar file from https://www.spigotmc.org/resources/iris-world-gen-custom-biome-colors.84586/")
@@ -127,19 +134,19 @@ def check_iris(iris_repo_dir: str):
         os.system("start https://www.spigotmc.org/resources/iris-world-gen-custom-biome-colors.84586/")
         exit(0)
 
-    if choice != "1":
+    if download_mode != "1":
         print("Skipping Iris")
         return
 
     print("Cloning Iris from github")
     
-    print("Using repodir: " + iris_repo_dir)
+    print("Using repodir: " + repo_dir)
 
     # Check if the repo exists
-    if not os.path.isdir(iris_repo_dir):
-        os.makedirs(iris_repo_dir)
+    if not os.path.isdir(repo_dir):
+        os.makedirs(repo_dir)
         print("Setting up Iris repo")
-        repo = Repo.clone_from("https://github.com/VolmitSoftware/Iris.git", iris_repo_dir)
+        repo = Repo.clone_from("https://github.com/VolmitSoftware/Iris.git", repo_dir)
         print("Cloned repository")
         repo.git.checkout("master")
         print("Checked out master")
@@ -147,23 +154,23 @@ def check_iris(iris_repo_dir: str):
         print("Pulled latest changes")
 
     # Run the gradlew setup task
-    if (not os.path.isdir(iris_repo_dir + "/build/buildtools/CraftBukkit")):
+    if (not os.path.isdir(repo_dir + "/build/buildtools/CraftBukkit")):
         print("Please make sure you have the CraftBukkit buildtools installed and setup") 
         input("Press enter to run the gradlew setup task. This script thinks it's not installed.")
-        subprocess.run("cd " + iris_repo_dir + " && gradlew setup", shell=True)
+        subprocess.run("cd " + repo_dir + " && gradlew setup", shell=True)
     
     # Run the gradlew Iris task
-    subprocess.run("cd " + iris_repo_dir + " && gradlew Iris", shell=True)
+    subprocess.run("cd " + repo_dir + " && gradlew Iris", shell=True)
 
     # Move the jar file that appeared in the build/libs directory to the plugins folder and rename it to Iris.jar
-    if (not os.path.isdir(iris_repo_dir + "/build/libs")):
+    if (not os.path.isdir(repo_dir + "/build/libs")):
         print("Could not find the Iris.jar file in the build/libs directory")
         print("Please make sure the build task was successful")
         exit(1)
 
-    for file in os.listdir(iris_repo_dir + "/build/libs"):
+    for file in os.listdir(repo_dir + "/build/libs"):
         if file.endswith(".jar"):
-            os.rename(iris_repo_dir + "/build/libs/" + file, "plugins/" + file)
+            os.rename(repo_dir + "/build/libs/" + file, "plugins/" + file)
             print("Moved " + file + " to plugins folder")
             break
 
@@ -173,21 +180,25 @@ def check_iris(iris_repo_dir: str):
 # https://github.com/VolmitSoftware/Rift/releases/download/1.0.1/Rift-1.0.1.jar
 # and move it to the plugins folder
 # or to skip downloading the jar file altogether
-def check_rift():
+def check_rift(download_mode: int):
     rift_regex = regex.compile(r'Rift-?.*\.jar')
     for file in os.listdir("plugins"):
         if rift_regex.match(file):
             print("Found " + file + " in plugins folder")
             return
 
-    print("Rift is not installed. Please enter how you wish to install Rift:")
-    print("1. Download the jar file from github (fast, ~1 minute)")
-    print("2. Do not install rift (skip)")
-    choice = input("Choice: ")
-    if choice == "1":
+    if download_mode == -1:
+
+        print("Rift is not installed. Please enter how you wish to install Rift:")
+        print("1. Download the jar file from github (fast, ~1 minute)")
+        print("2. Do not install rift (skip)")
+        download_mode = input("Choice: ")
+    if download_mode == "1":
         print("Downloading Rift from github")
         open("plugins/Rift.jar", "wb").write(requests.get("https://github.com/VolmitSoftware/Rift/releases/download/1.0.1/Rift-1.0.1.jar").content)
         print("Downloaded rift from github")
+    else:
+        print("Skipping Rift")
 
 # Check to make sure purpur is installed
 def check_purpur():
@@ -240,20 +251,23 @@ def run():
     if not os.path.isfile("run.bat"):
         print("Creating run.bat")
         with open("run.bat", "w") as f:
-            f.write("python run.py")
+            # Write "python" with the name of this file and pause on a new line
+            f.write("python " + os.path.basename(__file__) + "\nPAUSE")
     else:
         print("Found run.bat in server folder")
 
     if not os.path.isdir("plugins"):
         os.mkdir("plugins/")
 
+    download = config["download"]
+
     # Check if there is a jar of the regex (Iris-).*(\.jar)
-    if config["iris"]:
-        check_iris(config["irisRepoDir"])
+    if download["use_iris"]:
+        check_iris(download["iris_download_mode"], download["iris_repo"])
 
     # Check if there is a jar of the regex (Rift-).*(\.jar)
-    if config["rift"]:
-        check_rift()
+    if download["use_rift"]:
+        check_rift(download["rift_download_mode"])
 
     cmd = ["java"] + sys.argv[1:] + ["-jar", "purpur.jar", "nogui"]
 
