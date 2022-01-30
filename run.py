@@ -83,7 +83,8 @@ default_settings = {
         "iris_repo": "plugins/Iris/repo",
         "iris_download_mode": -1,
         "rift_download_mode": -1
-    }
+    },
+    "reboot_delay": 0
 }
 
 
@@ -229,7 +230,7 @@ def boot_loop(cmd: str, config: dict):
         print("Server stopped. Rebooting in 5 seconds. Press CTRL+C to cancel.")
         if config["clean"]:
             clean(config["cleanfolders"], config["cleanfiles"])
-        time.sleep(5)
+        time.sleep(config["reboot_delay"])
 
 # Cleanup directories
 def clean(folders, files):
