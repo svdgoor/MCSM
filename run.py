@@ -88,59 +88,35 @@ default_settings = {
 
 
 # Resets the config file
-def getConfig(configFile: str):
+def get_config(configFile: str):
     
     # Config path exists
     if not os.path.exists("./" + configFile):
+
+        # Set the config file to the default settings
         with open(configFile, "w") as f:
             f.write(json.dumps(default_settings, indent=4))
             return default_settings
-    config = None
+
+    # Read the config file
     with open(configFile, "r") as file:
+
+        # Read the json
         configJson = json.load(file)
+
         for dataTag in default_settings.keys():
             if not dataTag in configJson:
+                print("Missing tag: " + dataTag + ", resetting to default")
                 file.close()
                 with open(configFile, "w") as f:
                     f.write(json.dumps(default_settings, indent=4))
                 return default_settings
-        config = json.load(file)
 
     print("Loaded config")
-    return config
+    return configJson
 
-def check_iris(download_mode: int, repo_dir: str):
-    for file in os.listdir("plugins"):
-        if iris_regex.match(file):
-            print("Found " + file + " in plugins folder")
-            return
-
-    if (download_mode == -1):
-
-        print("Iris is not installed. Please enter how you wish to install Iris:")
-        print("1. Download the git repository and setup (~5 to 10 minutes first time, ~1 minute after)")
-        print("2. Download the jar file from spigot (~1 minute)")
-        print("3. Install Iris manually (skip)")
-        download_mode = input("Choice: ")
-
-    if download_mode == "2":
-        # Open https://www.spigotmc.org/resources/iris-world-gen-custom-biome-colors.84586/
-        # and download the jar file
-        print("Download the jar file from https://www.spigotmc.org/resources/iris-world-gen-custom-biome-colors.84586/")
-        print("and move it to the plugins folder")
-        print("and run this script again")
-        # Open the webbrowser with the website
-        time.sleep(1)
-        os.system("start https://www.spigotmc.org/resources/iris-world-gen-custom-biome-colors.84586/")
-        exit(0)
-
-    if download_mode != "1":
-        print("Skipping Iris")
-        return
-
-    print("Cloning Iris from github")
-    
-    print("Using repodir: " + repo_dir)
+def install_iris_github(repo_dir: str):
+    print("Cloning Iris from github, using repodir: " + repo_dir)
 
     # Check if the repo exists
     if not os.path.isdir(repo_dir):
@@ -174,6 +150,42 @@ def check_iris(download_mode: int, repo_dir: str):
             print("Moved " + file + " to plugins folder")
             break
 
+def check_iris(download_mode: int, repo_dir: str, update: bool):
+    for file in os.listdir("plugins"):
+        if iris_regex.match(file):
+            if update:
+                os.remove(file)
+                print("Removed " + file + " from plugins folder to update")
+            else:
+                print("Found " + file + " in plugins folder")
+                return
+
+    if (download_mode == -1):
+
+        print("Iris is not installed. Please enter how you wish to install Iris:")
+        print("1. Download the git repository and setup (~5 to 10 minutes first time, ~1 minute after)")
+        print("2. Download the jar file from spigot (~1 minute)")
+        print("3. Install Iris manually (skip)")
+        download_mode = int(input("Choice: "))
+
+    if download_mode == 2:
+        # Open https://www.spigotmc.org/resources/iris-world-gen-custom-biome-colors.84586/
+        # and download the jar file
+        print("Download the jar file from https://www.spigotmc.org/resources/iris-world-gen-custom-biome-colors.84586/")
+        print("and move it to the plugins folder")
+        print("and run this script again")
+        # Open the webbrowser with the website
+        time.sleep(1)
+        os.system("start https://www.spigotmc.org/resources/iris-world-gen-custom-biome-colors.84586/")
+        exit(0)
+
+    if download_mode != 1:
+        print("Skipping Iris")
+        return
+
+    # Install Iris using the github repo
+    install_iris_github(repo_dir)
+
 # Check if the rift jar exists
 # Use regex to find the jar file, with pattern: Rift-?.*\.jar
 # If the jar file is not found, ask the user to download it from 
@@ -188,12 +200,11 @@ def check_rift(download_mode: int):
             return
 
     if download_mode == -1:
-
         print("Rift is not installed. Please enter how you wish to install Rift:")
         print("1. Download the jar file from github (fast, ~1 minute)")
         print("2. Do not install rift (skip)")
         download_mode = input("Choice: ")
-    if download_mode == "1":
+    if download_mode == 1:
         print("Downloading Rift from github")
         open("plugins/Rift.jar", "wb").write(requests.get("https://github.com/VolmitSoftware/Rift/releases/download/1.0.1/Rift-1.0.1.jar").content)
         print("Downloaded rift from github")
@@ -230,7 +241,7 @@ def clean(folders, files):
 
 # Run the server
 def run():
-    config = getConfig("servermanager.json")
+    config = get_config("servermanager.json")
 
     # Cleanup
     if config["clean"]:
@@ -256,6 +267,15 @@ def run():
     else:
         print("Found run.bat in server folder")
 
+    # Check if the update.bat file exists
+    if not os.path.isfile("update.bat"):
+        print("Creating update.bat")
+        with open("update.bat", "w") as f:
+            # Write "python" with the name of this file and pause on a new line
+            f.write("python " + os.path.basename(__file__) + " -u\nPAUSE")
+    else:
+        print("Found update.bat in server folder")
+
     if not os.path.isdir("plugins"):
         os.mkdir("plugins/")
 
@@ -263,7 +283,7 @@ def run():
 
     # Check if there is a jar of the regex (Iris-).*(\.jar)
     if download["use_iris"]:
-        check_iris(download["iris_download_mode"], download["iris_repo"])
+        check_iris(download["iris_download_mode"], download["iris_repo"], len(sys.argv) > 1 and sys.argv[1] == "-u")
 
     # Check if there is a jar of the regex (Rift-).*(\.jar)
     if download["use_rift"]:
