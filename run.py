@@ -80,9 +80,11 @@ default_settings = {
     "download": {
         "use_iris": True,
         "use_rift": True,
+        "use_bile": True,
         "iris_repo": "plugins/Iris/repo",
         "iris_download_mode": -1,
-        "rift_download_mode": -1
+        "rift_download_mode": -1,
+        "bile_download_mode": -1
     },
     "reboot_delay": 0
 }
@@ -212,6 +214,31 @@ def check_rift(download_mode: int):
     else:
         print("Skipping Rift")
 
+# Check if the bile jar exists
+# Use regex to find the jar file, with pattern: Bile-?.*\.jar
+# If the jar file is not found, ask the user to download it from
+# https://github.com/VolmitSoftware/BileTools/releases/download/2/BileTools-2.jar
+# and move it to the plugins folder
+# or to skip downloading the jar file altogether
+def check_bile(download_mode: int):
+    bile_regex = regex.compile(r'Bile-?.*\.jar')
+    for file in os.listdir("plugins"):
+        if bile_regex.match(file):
+            print("Found " + file + " in plugins folder")
+            return
+
+    if download_mode == -1:
+        print("Bile is not installed. Please enter how you wish to install Bile:")
+        print("1. Download the jar file from github (fast, ~1 minute)")
+        print("2. Do not install bile (skip)")
+        download_mode = input("Choice: ")
+    if download_mode == 1:
+        print("Downloading Bile from github")
+        open("plugins/Bile.jar", "wb").write(requests.get("https://github.com/VolmitSoftware/BileTools/releases/download/2/BileTools-2.jar").content)
+        print("Downloaded bile from github")
+    else:
+        print("Skipping Bile")
+
 # Check to make sure purpur is installed
 def check_purpur():
     if not os.path.isfile("purpur.jar"):
@@ -265,7 +292,7 @@ def run():
         print("Creating run.bat")
         with open("run.bat", "w") as f:
             # Write "python" with the name of this file and pause on a new line
-            f.write("python " + os.path.basename(__file__) + "\nPAUSE")
+            f.write("python " + os.path.basename(__file__) + " -Xmx1G -Xms1G\nPAUSE")
     else:
         print("Found run.bat in server folder")
 
@@ -290,6 +317,10 @@ def run():
     # Check if there is a jar of the regex (Rift-).*(\.jar)
     if download["use_rift"]:
         check_rift(download["rift_download_mode"])
+
+    # Check if there is a jar of the regex (Bile-).*(\.jar)
+    if download["use_bile"]:
+        check_bile(download["bile_download_mode"])
 
     cmd = ["java"] + sys.argv[1:] + ["-jar", "purpur.jar", "nogui"]
 
