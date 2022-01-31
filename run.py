@@ -25,16 +25,40 @@
 # Run the server with the following command:
 # java -Xmx<ram>M -Xms<ram>M -jar purpur.jar nogui
 
+import os, subprocess, os, shutil, json, time
 
-import os
-import time
-import subprocess
-from turtle import down
-import requests
-import sys
-from git import Repo
-import regex
-import os, shutil, json
+try:
+    import regex
+except ImportError:
+    print("Trying to Install required module: regex\n")
+    subprocess.run(["python", "-m", "pip", "install", "regex", "--user"])
+    try:
+        import regex
+    except ImportError:
+        print("Failed to install Regex. Please install manually by running: pip install regex")
+        print("In a terminal, run: python -m pip install regex")
+
+try:
+    import requests
+except ImportError:
+    print("Trying to Install required module: requests\n")
+    subprocess.run(["python", "-m", "pip", "install", "requests", "--user"])
+    try:
+        import requests
+    except ImportError:
+        print("Failed to install requests. Please install manually by running: pip install requests")
+        print("In a terminal, run: python -m pip install requests")
+
+try:
+    from git import Repo
+except ImportError:
+    print("Trying to Install required module: git\n")
+    subprocess.run(["python", "-m", "pip", "install", "gitpython", "--user"])
+    try:
+        from git import Repo
+    except ImportError:
+        print("Failed to install git. Please install manually by running: pip install gitpython")
+        print("In a terminal, run: python -m pip install gitpython")
 
 iris_regex = regex.compile(r'Iris-?.*\.jar')
 
