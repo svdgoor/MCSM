@@ -282,7 +282,7 @@ def check_overworld():
         if not os.path.isdir("plugins/Iris/packs/overworld"):
             os.makedirs("plugins/Iris/packs/overworld")
         # clone the repository
-        subprocess.run(["git", "clone", "https://github.com/IrisDimensions/overworld.git", "plugins/Iris/packs/"])
+        subprocess.run(["git", "clone", "https://github.com/IrisDimensions/overworld.git", "plugins/Iris/packs/overworld"])
         print("Downloaded overworld git repository")
     else:
         print("Found overworld in the packs directory")
