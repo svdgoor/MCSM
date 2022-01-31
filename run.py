@@ -81,6 +81,7 @@ default_settings = {
         "use_iris": True,
         "use_rift": True,
         "use_bile": True,
+        "use_overworld": True,
         "iris_repo": "plugins/Iris/repo",
         "iris_download_mode": -1,
         "rift_download_mode": -1,
@@ -247,6 +248,21 @@ def check_purpur():
     else:
         print("Found purpur.jar in the current directory")
 
+# Check to make sure the overworld is installed
+def check_overworld():
+    # If there is not a file called "overworld.json" in */plugins/Iris/packs/overworld/dimensions/
+    # then clone the git repository at https://github.com/IrisDimensions/overworld.git
+    if not os.path.isfile("plugins/Iris/packs/overworld/dimensions/overworld.json"):
+        print("Downloading overworld from https://github.com/IrisDimensions/overworld.git")
+        # make the directory if it doesn't exist
+        if not os.path.isdir("plugins/Iris/packs/overworld"):
+            os.mkdir("plugins/Iris/packs/overworld")
+        # clone the repository
+        subprocess.run(["git", "clone", "https://github.com/IrisDimensions/overworld.git", "plugins/Iris/packs/"])
+        print("Downloaded overworld git repository")
+    else:
+        print("Found overworld in the packs directory")
+
 # Run the main server loop
 def boot_loop(cmd: str, config: dict):
         
@@ -321,6 +337,10 @@ def run():
     # Check if there is a jar of the regex (Bile-).*(\.jar)
     if download["use_bile"]:
         check_bile(download["bile_download_mode"])
+
+    # Check if there isa folder called "overworld" in */plugins/Iris/packs
+    if download["use_overworld"]:
+        check_overworld()
 
     cmd = ["java"] + sys.argv[1:] + ["-jar", "purpur.jar", "nogui"]
 
