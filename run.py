@@ -25,7 +25,7 @@
 # Run the server with the following command:
 # java -Xmx<ram>M -Xms<ram>M -jar purpur.jar nogui
 
-import os, subprocess, os, shutil, json, time
+import os, subprocess, sys, shutil, json, time
 
 try:
     import regex
