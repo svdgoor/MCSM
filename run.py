@@ -167,14 +167,14 @@ def install_iris_github(repo_dir: str):
     subprocess.run("cd " + repo_dir + " && gradlew Iris", shell=True)
 
     # Move the jar file that appeared in the build/libs directory to the plugins folder and rename it to Iris.jar
-    if (not os.path.isdir(repo_dir + "/build/libs")):
+    if (not os.path.isdir(repo_dir + "/build")):
         print("Could not find the Iris.jar file in the build/libs directory")
         print("Please make sure the build task was successful")
         exit(1)
 
-    for file in os.listdir(repo_dir + "/build/libs"):
+    for file in os.listdir(repo_dir + "/build"):
         if file.endswith(".jar"):
-            os.rename(repo_dir + "/build/libs/" + file, "plugins/" + file)
+            os.rename(repo_dir + "/build/" + file, "plugins/" + file)
             print("Moved " + file + " to plugins folder")
             break
 
