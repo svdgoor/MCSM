@@ -254,7 +254,7 @@ def install_iris(program: dict, update: bool):
 
     # Check if the directory exists
     if not os.path.isdir(program_dir):
-        os.makedirs(os.getcwd() + program_dir)
+        os.makedirs(program_dir)
 
     # Check if the program is installed using regex
     for file in os.listdir(program_dir):
@@ -327,9 +327,11 @@ def install_programs(config: dict, update: bool):
 
 # If the file is missing, create it and add the content
 def install_file(filename: str, directory: str, content: str):
-    if not os.path.isfile(directory + "/" + filename):
+    if directory != "":
+        directory = directory + "/"
+    if not os.path.isfile(directory + filename):
         print("Creating " + filename + " in " + directory)
-        with open(directory + "/" + filename, "w") as file:
+        with open(directory + filename, "w") as file:
             print("Writing " + content + " to " + filename)
             file.write(content)
     else:
