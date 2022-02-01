@@ -106,10 +106,13 @@ default_settings = {
         "use_rift": True,
         "use_bile": True,
         "use_overworld": True,
+        "use_worldedit": True,
         "iris_repo": "plugins/Iris/repo",
         "iris_download_mode": -1,
         "rift_download_mode": -1,
-        "bile_download_mode": -1
+        "bile_download_mode": -1,
+        "overworld_download_mode": -1,
+        "worldedit_download_mode": -1,
     },
     "reboot_delay": 0
 }
@@ -273,10 +276,18 @@ def check_purpur():
         print("Found purpur.jar in the current directory")
 
 # Check to make sure the overworld is installed
-def check_overworld():
+def check_overworld(download_mode: int):
     # If there is not a file called "overworld.json" in */plugins/Iris/packs/overworld/dimensions/
     # then clone the git repository at https://github.com/IrisDimensions/overworld.git
-    if not os.path.isfile("plugins/Iris/packs/overworld/dimensions/overworld.json"):
+    if os.path.isfile("plugins/Iris/packs/overworld/dimensions/overworld.json"):
+        return
+    
+    if download_mode == -1:
+        print("The Overworld is not installed. Please enter how you wish to install the Overworld:")
+        print("1. Download the pack from github (fast, ~1 minute)")
+        print("2. Do not install the Overworld (skip)")
+        download_mode = input("Choice: ")
+    if download_mode == 1:
         print("Downloading overworld from https://github.com/IrisDimensions/overworld.git")
         # make the directory if it doesn't exist
         if not os.path.isdir("plugins/Iris/packs/overworld"):
@@ -286,6 +297,31 @@ def check_overworld():
         print("Downloaded overworld git repository")
     else:
         print("Found overworld in the packs directory")
+
+# Check if the worldedit jar exists
+# Use regex to find the jar file, with pattern: worldedit-bukkit-?.*\.jar
+# If the jar file is not found, download it from
+# https://dev.bukkit.org/projects/worldedit/files/latest
+# and move it to the plugins folder
+# or to skip downloading the jar file altogether
+def check_worldedit(download_mode: int):
+    worldedit_regex = regex.compile(r'worldedit-bukkit-?.*\.jar')
+    for file in os.listdir("plugins"):
+        if worldedit_regex.match(file):
+            print("Found " + file + " in plugins folder")
+            return
+
+    if download_mode == -1:
+        print("WorldEdit is not installed. Please enter how you wish to install WorldEdit:")
+        print("1. Download the jar file from dev.bukkit.org (fast, ~1 minute)")
+        print("2. Do not install worldedit (skip)")
+        download_mode = input("Choice: ")
+    if download_mode == 1:
+        print("Downloading worldedit from dev.bukkit.org")
+        open("plugins/worldedit.jar", "wb").write(requests.get("https://dev.bukkit.org/projects/worldedit/files/latest").content)
+        print("Downloaded worldedit from dev.bukkit.org")
+    else:
+        print("Skipping WorldEdit")
 
 # Run the main server loop
 def boot_loop(cmd: str, config: dict):
@@ -364,7 +400,10 @@ def run():
 
     # Check if there isa folder called "overworld" in */plugins/Iris/packs
     if download["use_overworld"]:
-        check_overworld()
+        check_overworld(download["overworld_download_mode"])
+
+    if download["use_worldedit"]:
+        check_worldedit(download["worldedit_download_mode"])
 
     cmd = ["java"] + sys.argv[1:] + ["-jar", "purpur.jar", "nogui"]
 
