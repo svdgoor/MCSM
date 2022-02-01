@@ -1,31 +1,7 @@
-# Starts the minecraft server
-# 
-# Get the amount of MB ram from the system arguments, default to 1024
-# 
-# If the purpur.jar file does not exist, download it from 
-# https://api.purpurmc.org/v2/purpur/1.18.1/latest/download
-# and rename the file to purpur.jar
-#
-# If the eula.txt file does not exist, create it and add the following text:
-# eula=true
-#
-# If the run.bat file does not exist, create it and let it run this file with the ram argument
-# 
-# If the plugins/Iris.jar file does not exist and there is not a jar of the regex (Iris-).*(\.jar),
-# Ask the user to choose between:
-# 1. download the git repository from https://github.com/VolmitSoftware/Iris and run the gradlew setup task and then the gradlew Iris task
-# 2. download the jar from https://www.spigotmc.org/resources/iris-world-gen-custom-biome-colors.84586/
-# 3. skip downloading Iris (do it manually)
-# 
-# If the plugins/Rift.jar file does not exist,
-# Ask the user to choose between:
-# 1. download the jar from https://github.com/VolmitSoftware/Rift/releases/download/1.0.1/Rift-1.0.1.jar
-# 2. skip downloading Rift (do it manually)
-#
-# Run the server with the following command:
-# java -Xmx<ram>M -Xms<ram>M -jar purpur.jar nogui
+# Starts the minecraft server and a couple programs to run
 
-import os, subprocess, sys, shutil, json, time
+import os, subprocess, sys, shutil, json, time, cgi
+from urllib.request import Request, urlopen, urlretrieve, build_opener, install_opener
 
 try:
     import regex
@@ -39,17 +15,6 @@ except ImportError:
         print("In a terminal, run: python -m pip install regex")
 
 try:
-    import requests
-except ImportError:
-    print("Trying to Install required module: requests\n")
-    subprocess.run(["python", "-m", "pip", "install", "requests", "--user"])
-    try:
-        import requests
-    except ImportError:
-        print("Failed to install requests. Please install manually by running: pip install requests")
-        print("In a terminal, run: python -m pip install requests")
-
-try:
     from git import Repo
 except ImportError:
     print("Trying to Install required module: git\n")
@@ -60,63 +25,104 @@ except ImportError:
         print("Failed to install git. Please install manually by running: pip install gitpython")
         print("In a terminal, run: python -m pip install gitpython")
 
-iris_regex = regex.compile(r'Iris-?.*\.jar')
-
-rift_regex = regex.compile(r'Rift-?.*\.jar')
-
 default_settings = {
-    "clean": False,
-    "cleanfolders": [
-        "./crash-reports",
-        "./logs",
-        "./w",
-        "./v",
-        "./x",
-        "./y",
-        "./z",
-        "./k",
-        "./l",
-        "./o",
-        "./world/advancements",
-        "./world/data",
-        "./world/entities",
-        "./world/playerdata",
-        "./world/poi",
-        "./world/region",
-        "./world/stats"
-    ],
-    "cleanfiles": [
-        "version_history.json",
-        ".console_history",
-        "banned-ips.json",
-        "banned-players.json",
-        "commands.yml",
-        "help.yml",
-        "permissions.yml",
-        "wepif.yml",
-        "whitelist.json",
-        "usercache.json",
-        "./world/level.dat",
-        "./world/level.dat_old",
-        "./world/session.lock",
-        "./world/uid.dat"
-    ],
-    "download": {
-        "use_iris": True,
-        "use_rift": True,
-        "use_bile": True,
-        "use_overworld": True,
-        "use_worldedit": True,
-        "iris_repo": "plugins/Iris/repo",
-        "iris_download_mode": -1,
-        "rift_download_mode": -1,
-        "bile_download_mode": -1,
-        "overworld_download_mode": -1,
-        "worldedit_download_mode": -1,
+    "run_regex": "purpur.*\.jar",
+    "clean": {
+        "enabled": False,
+        "enabled_on_reboot": False,
+        "folders": [
+            "./crash-reports",
+            "./logs",
+            "./w",
+            "./v",
+            "./x",
+            "./y",
+            "./z",
+            "./k",
+            "./l",
+            "./o",
+            "./world/advancements",
+            "./world/data",
+            "./world/entities",
+            "./world/playerdata",
+            "./world/poi",
+            "./world/region",
+            "./world/stats"
+        ],
+        "files": [
+            "version_history.json",
+            ".console_history",
+            "banned-ips.json",
+            "banned-players.json",
+            "commands.yml",
+            "help.yml",
+            "permissions.yml",
+            "wepif.yml",
+            "whitelist.json",
+            "usercache.json",
+            "./world/level.dat",
+            "./world/level.dat_old",
+            "./world/session.lock",
+            "./world/uid.dat"
+        ]
     },
+    "do_download": True,
+    "download": [
+        {
+            "name": "Iris",
+            "use": True,
+            "url": "https://www.spigotmc.org/resources/iris-world-gen-custom-biome-colors.84586/",
+            "dir": "plugins",
+            "regex": "Iris-?.*\.jar",
+            "mode": 1,
+
+            "git_url": "https://github.com/VolmitSoftware/Iris.git",
+            "git_branch": "master",
+            "git_repo_dir": "plugins/Iris/repo"
+        },
+        {
+            "name": "Rift",
+            "use": True,
+            "url": "https://github.com/VolmitSoftware/Rift/releases/download/1.0.1/Rift-1.0.1.jar",
+            "dir": "plugins",
+            "regex": "Rift-?.*\.jar",
+            "mode": 1
+        },
+        {
+            "name": "Purpur",
+            "use": True,
+            "url": "https://api.purpurmc.org/v2/purpur/1.18.1/latest/download",
+            "dir": "",
+            "regex": "Purpur-?.*\.jar",
+            "mode": 1
+        },
+        {
+            "name": "BileTools",
+            "use": True,
+            "url": "https://github.com/VolmitSoftware/BileTools/releases/download/2/BileTools-2.jar",
+            "dir": "plugins",
+            "regex": "BileTools-?.*\.jar",
+            "mode": 1
+        },
+        {
+            "name": "WorldEdit",
+            "use": True,
+            "url": "https://dev.bukkit.org/projects/worldedit/files/latest",
+            "dir": "plugins",
+            "regex": "WorldEdit-Bukkit?.*\.jar",
+            "mode": 1
+        },
+        {
+            "name": "EssentialsX",
+            "use": True,
+            "url": "https://github.com/EssentialsX/Essentials/releases/download/2.19.2/EssentialsX-2.19.2.jar",
+            "dir": "plugins",
+            "regex": "EssentialsX-?.*\.jar",
+            "mode": 1
+        }
+    ],
     "reboot_delay": 0
 }
-
 
 # Resets the config file
 def get_config(configFile: str):
@@ -146,269 +152,250 @@ def get_config(configFile: str):
     print("Loaded config")
     return configJson
 
-def install_iris_github(repo_dir: str):
-    print("Cloning Iris from github, using repodir: " + repo_dir)
+# Download file from url to directory with original filename
+def download_file(url: str, directory: str, backupname: str):
+
+    # Create the build opener
+    opener = build_opener()
+    opener.addheaders = [('User-agent', 'Mozilla/5.0')]
+    install_opener(opener)
+
+    # Get the headers
+    header_details = urlopen(url).info()['Content-Disposition']
+    filename = ""
+    if not header_details:
+        print("Failed to get file name from header from: " + url)
+        print("Using backup name: " + backupname)
+        filename = backupname
+    else:
+        value, params = cgi.parse_header(header_details)
+        filename = params['filename']
+
+    # Get the file
+    urlretrieve(url, directory + "/" + filename)
+
+# Check if the @program_name is installed in @program_dir
+# Use regex to find the jar file, with pattern: @regex_match
+# If @update is true, remove the jar file from @program_dir
+# If the jar file is not found, ask the user for input or use: @download_mode
+# If the jar file is found, print a message saying so
+# If it is not found, ask the user to:
+# 1. Have it automatically downloaded from @program_url
+# 2. Send the @program_url to the user with a small tutorial and shutdown the program
+# 3. Do not install the program (skip)
+def install_program(
+    program_name: str,
+    program_mode: int,
+    program_url: str,
+    program_dir: str,
+    program_regex: str,
+    update: bool
+):
+    # Add cwd to program_dir
+    program_dir = os.path.join(os.getcwd(), program_dir)
+
+    # Create the compiled regex from the regex_match string
+    regex_compiled = regex.compile(program_regex)
+
+    # Check if the directory exists
+    if not os.path.isdir(program_dir):
+        os.makedirs(os.getcwd() + program_dir)
+
+    # Check if the program is installed using regex
+    for file in os.listdir(program_dir):
+        if regex_compiled.match(file):
+            if update:
+                os.remove(program_dir + "/" + file)
+                print("Removed " + file + " from " + program_dir + " to update")
+            else:
+                print("Found " + file + " in plugins folder for program: " + program_name)
+                return
+
+    # Check if the download mode is -1, meaning the user provides a choice
+    if program_mode == -1:
+        print("{} is not installed. Please enter how you wish to install {}:".format(program_name, program_name))
+        print("1. Download the jar file from {} (fast, ~1 minute)".format(program_url))
+        print("2. Download the jar file manually from the website (manual, ~2 minutes")
+        print("3. Do not install {} (skip)".format(program_name))
+        program_mode = input("Choice: ")
+
+    # Check if the download mode is 1, meaning the jar file should be downloaded from the download_url
+    if program_mode == 1:
+        print("Downloading {} from {}".format(program_name, program_url))
+        download_file(program_url, program_dir, program_name + ".jar")
+        print("Downloaded {} from {}".format(program_name, program_url))
+
+    # Check if the download mode is 2, meaning the jar file should be downloaded from the website manually
+    elif program_mode == 2:
+        print("Download the jar file from {}".format(program_url))
+        print("Then, move it to the correct folder ({}), and run this script again".format(program_dir))
+        time.sleep(1)
+        os.system("start " + program_url)
+        exit(0)
+
+    # Check if the download mode is something else, meaning the jar file should not be installed
+    else:
+        print("Skipping {}".format(program_name))
+
+# Iris installation
+def install_iris(program: dict, update: bool):
+
+    program_mode = program["mode"]
+    program_name = program["name"]
+    program_dir = os.path.join(os.getcwd(), program["dir"])
+    program_regex = program["regex"]
+    program_url = program["url"]
+    program_git_url = program["git_url"]
+    program_git_branch = program["git_branch"]
+    program_git_repo_dir = program["git_repo_dir"]
+
+    # Create the compiled regex from the regex_match string
+    regex_compiled = regex.compile(program_regex)
+
+    # Check if the directory exists
+    if not os.path.isdir(program_dir):
+        os.makedirs(os.getcwd() + program_dir)
+
+    # Check if the program is installed using regex
+    for file in os.listdir(program_dir):
+        if regex_compiled.match(file):
+            if update:
+                os.remove(program_dir + "/" + file)
+                print("Removed " + file + " from " + program_dir + " to update")
+            else:
+                print("Found " + file + " in plugins folder for program: " + program_name)
+                return
+
+    # Check if the download mode is -1, meaning the user provides a choice
+    if program_mode == -1:
+        print("{} is not installed. Please enter how you wish to install {}:".format(program_name, program_name))
+        print("1. Clone the jar file from {} (~10 minutes the first time / ~1 minute after)".format(program_git_url))
+        print("2. Download the jar file manually from the website (manual, ~2 minutes)")
+        print("3. Do not install {} (skip)".format(program_name))
+        program_mode = input("Choice: ")
+
+    # Run normal install unless the user selected option 1
+    if program_mode != 1:
+        install_program(program_name, program_mode, program_url, program_dir, program_regex, update)
+        return
+
+    # Check if the directory exists
+    print("Cloning Iris from github, using repodir: " + program_git_repo_dir)
 
     # Check if the repo exists
-    if not os.path.isdir(repo_dir):
-        os.makedirs(repo_dir)
+    if not os.path.isdir(program_git_repo_dir):
+        os.makedirs(program_git_repo_dir)
         print("Setting up Iris repo")
-        repo = Repo.clone_from("https://github.com/VolmitSoftware/Iris.git", repo_dir)
+        repo = Repo.clone_from(program_git_url, program_git_repo_dir)
         print("Cloned repository")
-        repo.git.checkout("master")
-        print("Checked out master")
+        repo.git.checkout(program_git_branch)
+        print("Checked out " + program_git_branch)
         repo.git.pull()
         print("Pulled latest changes")
 
-    # Run the gradlew setup task
-    if (not os.path.isdir(repo_dir + "/build/buildtools/CraftBukkit")):
+    # Run the gradlew Setup task unless already (seemingly) setup
+    # Warning: This check is pretty shallow but does the job 99% of the time
+    if (not os.path.isdir(program_git_repo_dir + "/build/buildtools/CraftBukkit")):
         print("Please make sure you have the CraftBukkit buildtools installed and setup") 
         input("Press enter to run the gradlew setup task. This script thinks it's not installed.")
-        subprocess.run("cd " + repo_dir + " && gradlew setup", shell=True)
+        subprocess.run("cd " + program_git_repo_dir + " && gradlew setup", shell=True)
     
     # Run the gradlew Iris task
-    subprocess.run("cd " + repo_dir + " && gradlew Iris", shell=True)
+    subprocess.run("cd " + program_git_repo_dir + " && gradlew Iris", shell=True)
 
     # Move the jar file that appeared in the build/libs directory to the plugins folder and rename it to Iris.jar
-    if (not os.path.isdir(repo_dir + "/build")):
+    if (not os.path.isdir(program_git_repo_dir + "/build")):
         print("Could not find the Iris.jar file in the build/libs directory")
         print("Please make sure the build task was successful")
         exit(1)
 
-    for file in os.listdir(repo_dir + "/build"):
+    # Move the jar file that appeared in build to the program directory
+    for file in os.listdir(program_git_repo_dir + "/build"):
         if file.endswith(".jar"):
-            os.rename(repo_dir + "/build/" + file, "plugins/" + file)
+            os.rename(program_git_repo_dir + "/build/" + file, program_dir + "/" + file)
             print("Moved " + file + " to plugins folder")
             break
 
-def check_iris(download_mode: int, repo_dir: str, update: bool):
-    for file in os.listdir("plugins"):
-        if iris_regex.match(file):
-            if update:
-                os.remove(file)
-                print("Removed " + file + " from plugins folder to update")
+# Install all programs in the "download" list in the config file
+def install_programs(config: dict, update: bool):
+    for program in config["download"]:
+        if program["use"]:
+            if program["name"] == "Iris":
+                install_iris(program, update)
             else:
-                print("Found " + file + " in plugins folder")
-                return
+                install_program(program["name"], program["mode"], program["url"], program["dir"], program["regex"], update)
 
-    if (download_mode == -1):
+# If the file is missing, create it and add the content
+def install_file(filename: str, directory: str, content: str):
+    if not os.path.isfile(directory + "/" + filename):
+        print("Creating " + filename + " in " + directory)
+        with open(directory + "/" + filename, "w") as file:
+            print("Writing " + content + " to " + filename)
+            file.write(content)
+    else:
+        print("Found " + filename + " in " + directory)
 
-        print("Iris is not installed. Please enter how you wish to install Iris:")
-        print("1. Download the git repository and setup (~5 to 10 minutes first time, ~1 minute after)")
-        print("2. Download the jar file from spigot (~1 minute)")
-        print("3. Install Iris manually (skip)")
-        download_mode = int(input("Choice: "))
+# Install eula.txt, run.bat and update.bat
+def install_files():
 
-    if download_mode == 2:
-        # Open https://www.spigotmc.org/resources/iris-world-gen-custom-biome-colors.84586/
-        # and download the jar file
-        print("Download the jar file from https://www.spigotmc.org/resources/iris-world-gen-custom-biome-colors.84586/")
-        print("and move it to the plugins folder")
-        print("and run this script again")
-        # Open the webbrowser with the website
-        time.sleep(1)
-        os.system("start https://www.spigotmc.org/resources/iris-world-gen-custom-biome-colors.84586/")
-        exit(0)
+    # Check for eula.txt with the content "eula=true"
+    install_file("eula.txt", "", "eula=true")
 
-    if download_mode != 1:
-        print("Skipping Iris")
+    # Check for run.bat with the content "python " + this_file + " -Xmx1G -Xms1G\nPAUSE"
+    install_file("run.bat", "", "python " + os.path.basename(__file__) + " -Xmx1G -Xms1G\nPAUSE")
+
+    # Check for update.bat with the content "python " + this_file + " -u\nPAUSE"
+    install_file("update.bat", "", "python " + os.path.basename(__file__) + " -u\nPAUSE")
+
+# Cleanup directories
+def clean(clean_config: dict):
+    if not clean_config["enabled"]:
+        print("Skipping cleanup")
         return
 
-    # Install Iris using the github repo
-    install_iris_github(repo_dir)
+    # Cleanup the directory
+    print("Cleaning up directories")
+    for folder in clean_config["folders"]:
+        shutil.rmtree(folder, True)
+    for file in clean_config["files"]:
+        if os.path.exists(file):
+            os.remove(file)
 
-# Check if the rift jar exists
-# Use regex to find the jar file, with pattern: Rift-?.*\.jar
-# If the jar file is not found, ask the user to download it from 
-# https://github.com/VolmitSoftware/Rift/releases/download/1.0.1/Rift-1.0.1.jar
-# and move it to the plugins folder
-# or to skip downloading the jar file altogether
-def check_rift(download_mode: int):
-    rift_regex = regex.compile(r'Rift-?.*\.jar')
-    for file in os.listdir("plugins"):
-        if rift_regex.match(file):
-            print("Found " + file + " in plugins folder")
-            return
+# Run the server
+if __name__ == "__main__":
 
-    if download_mode == -1:
-        print("Rift is not installed. Please enter how you wish to install Rift:")
-        print("1. Download the jar file from github (fast, ~1 minute)")
-        print("2. Do not install rift (skip)")
-        download_mode = input("Choice: ")
-    if download_mode == 1:
-        print("Downloading Rift from github")
-        open("plugins/Rift.jar", "wb").write(requests.get("https://github.com/VolmitSoftware/Rift/releases/download/1.0.1/Rift-1.0.1.jar").content)
-        print("Downloaded rift from github")
-    else:
-        print("Skipping Rift")
+    # Get config
+    config = get_config("servermanager.json")
 
-# Check if the bile jar exists
-# Use regex to find the jar file, with pattern: Bile-?.*\.jar
-# If the jar file is not found, ask the user to download it from
-# https://github.com/VolmitSoftware/BileTools/releases/download/2/BileTools-2.jar
-# and move it to the plugins folder
-# or to skip downloading the jar file altogether
-def check_bile(download_mode: int):
-    bile_regex = regex.compile(r'Bile-?.*\.jar')
-    for file in os.listdir("plugins"):
-        if bile_regex.match(file):
-            print("Found " + file + " in plugins folder")
-            return
-
-    if download_mode == -1:
-        print("Bile is not installed. Please enter how you wish to install Bile:")
-        print("1. Download the jar file from github (fast, ~1 minute)")
-        print("2. Do not install bile (skip)")
-        download_mode = input("Choice: ")
-    if download_mode == 1:
-        print("Downloading Bile from github")
-        open("plugins/Bile.jar", "wb").write(requests.get("https://github.com/VolmitSoftware/BileTools/releases/download/2/BileTools-2.jar").content)
-        print("Downloaded bile from github")
-    else:
-        print("Skipping Bile")
-
-# Check to make sure purpur is installed
-def check_purpur():
-    if not os.path.isfile("purpur.jar"):
-        print("Downloading purpur.jar from https://api.purpurmc.org/v2/purpur/1.18.1/latest/download")
-        open("purpur.jar", "wb").write(requests.get("https://api.purpurmc.org/v2/purpur/1.18.1/latest/download").content)
-    else:
-        print("Found purpur.jar in the current directory")
-
-# Check to make sure the overworld is installed
-def check_overworld(download_mode: int):
-    # If there is not a file called "overworld.json" in */plugins/Iris/packs/overworld/dimensions/
-    # then clone the git repository at https://github.com/IrisDimensions/overworld.git
-    if os.path.isfile("plugins/Iris/packs/overworld/dimensions/overworld.json"):
-        return
+    # Clean
+    clean(config["clean"])
     
-    if download_mode == -1:
-        print("The Overworld is not installed. Please enter how you wish to install the Overworld:")
-        print("1. Download the pack from github (fast, ~1 minute)")
-        print("2. Do not install the Overworld (skip)")
-        download_mode = input("Choice: ")
-    if download_mode == 1:
-        print("Downloading overworld from https://github.com/IrisDimensions/overworld.git")
-        # make the directory if it doesn't exist
-        if not os.path.isdir("plugins/Iris/packs/overworld"):
-            os.makedirs("plugins/Iris/packs/overworld")
-        # clone the repository
-        subprocess.run(["git", "clone", "https://github.com/IrisDimensions/overworld.git", "plugins/Iris/packs/overworld"])
-        print("Downloaded overworld git repository")
-    else:
-        print("Found overworld in the packs directory")
+    # Install programs
+    update_programs = len(sys.argv) > 1 and sys.argv[1] == "-u"
+    if config["do_download"]:
+        install_programs(config, update_programs)
 
-# Check if the worldedit jar exists
-# Use regex to find the jar file, with pattern: worldedit-bukkit-?.*\.jar
-# If the jar file is not found, download it from
-# https://dev.bukkit.org/projects/worldedit/files/latest
-# and move it to the plugins folder
-# or to skip downloading the jar file altogether
-def check_worldedit(download_mode: int):
-    worldedit_regex = regex.compile(r'worldedit-bukkit-?.*\.jar')
-    for file in os.listdir("plugins"):
-        if worldedit_regex.match(file):
-            print("Found " + file + " in plugins folder")
-            return
+    # Setup required files
+    install_files()
 
-    if download_mode == -1:
-        print("WorldEdit is not installed. Please enter how you wish to install WorldEdit:")
-        print("1. Download the jar file from dev.bukkit.org (fast, ~1 minute)")
-        print("2. Do not install worldedit (skip)")
-        download_mode = input("Choice: ")
-    if download_mode == 1:
-        print("Downloading worldedit from dev.bukkit.org")
-        open("plugins/worldedit.jar", "wb").write(requests.get("https://dev.bukkit.org/projects/worldedit/files/latest").content)
-        print("Downloaded worldedit from dev.bukkit.org")
-    else:
-        print("Skipping WorldEdit")
+    # Find the server jar using regex in config["run_regex"]
+    server_jar = ""
+    server_jar_regex = regex.compile(config["run_regex"])
+    for file in os.listdir(os.getcwd()):
+        if server_jar_regex.match(file):
+            server_jar = file
+            print("Found server jar: " + server_jar)
+            break
 
-# Run the main server loop
-def boot_loop(cmd: str, config: dict):
-        
+    # Create the command
+    flags = [flag for flag in sys.argv[1:] if flag != "-u"]
+    cmd = ["java"] + flags + ["-jar", server_jar, "nogui"]
+
     # Run the server
     while (True):
         print("Starting the server: " + str(cmd))
         subprocess.run(cmd, shell=True)
         print("Server stopped. Rebooting in " + str(config["reboot_delay"]) + " seconds. Press CTRL+C to cancel.")
-        if config["clean"]:
-            clean(config["cleanfolders"], config["cleanfiles"])
+        if config["clean"]["enabled_on_reboot"]:
+            clean(config["clean"])
         time.sleep(config["reboot_delay"])
-
-# Cleanup directories
-def clean(folders, files):
-    print("Cleaning up directories")
-    for folder in folders:
-        shutil.rmtree(folder, True)
-    for file in files:
-        if os.path.exists(file):
-            os.remove(file)
-
-# Run the server
-def run():
-    config = get_config("servermanager.json")
-
-    # Cleanup
-    if config["clean"]:
-        clean(config["cleanfolders"], config["cleanfiles"])
-
-    # Check if the jar file exists
-    check_purpur()
-
-    # Check if the eula.txt file exists
-    if not os.path.isfile("eula.txt"):
-        print("Creating eula.txt")
-        with open("eula.txt", "w") as f:
-            f.write("eula=true")
-    else:
-        print("Found eula.txt in server folder")
-
-    # Check if the run.bat file exists
-    if not os.path.isfile("run.bat"):
-        print("Creating run.bat")
-        with open("run.bat", "w") as f:
-            # Write "python" with the name of this file and pause on a new line
-            f.write("python " + os.path.basename(__file__) + " -Xmx1G -Xms1G\nPAUSE")
-    else:
-        print("Found run.bat in server folder")
-
-    # Check if the update.bat file exists
-    if not os.path.isfile("update.bat"):
-        print("Creating update.bat")
-        with open("update.bat", "w") as f:
-            # Write "python" with the name of this file and pause on a new line
-            f.write("python " + os.path.basename(__file__) + " -u\nPAUSE")
-    else:
-        print("Found update.bat in server folder")
-
-    if not os.path.isdir("plugins"):
-        os.mkdir("plugins/")
-
-    download = config["download"]
-
-    # Check if there is a jar of the regex (Iris-).*(\.jar)
-    if download["use_iris"]:
-        check_iris(download["iris_download_mode"], download["iris_repo"], len(sys.argv) > 1 and sys.argv[1] == "-u")
-
-    # Check if there is a jar of the regex (Rift-).*(\.jar)
-    if download["use_rift"]:
-        check_rift(download["rift_download_mode"])
-
-    # Check if there is a jar of the regex (Bile-).*(\.jar)
-    if download["use_bile"]:
-        check_bile(download["bile_download_mode"])
-
-    # Check if there isa folder called "overworld" in */plugins/Iris/packs
-    if download["use_overworld"]:
-        check_overworld(download["overworld_download_mode"])
-
-    if download["use_worldedit"]:
-        check_worldedit(download["worldedit_download_mode"])
-
-    cmd = ["java"] + sys.argv[1:] + ["-jar", "purpur.jar", "nogui"]
-
-    # Run the main server loop
-    boot_loop(cmd, config)
-
-if __name__ == "__main__":
-    run()
