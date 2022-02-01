@@ -364,6 +364,13 @@ def clean(clean_config: dict):
 # Run the server
 if __name__ == "__main__":
 
+    # If the current working directory is a user directory, matching regex "[ABCDEFGHIJK]:\*Users\*[a-z]*"
+    # Confirm with the user that they want to run the server
+    main_dir_regex = regex.compile("[ABCDEFGHIJK]:\\*Users\\*[a-z]*")
+    if main_dir_regex.match(os.getcwd()):
+        print("This script is not meant to be run from a user directory. Please run it from the root directory.")
+        input("Press enter to confirm if you're sure to run it in the root directory.")
+
     # Get config
     config = get_config("servermanager.json")
 
