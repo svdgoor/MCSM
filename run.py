@@ -1,7 +1,7 @@
 # Starts the minecraft server and a couple programs to run
 
 import os, subprocess, sys, shutil, json, time, cgi
-from urllib.request import Request, urlopen, urlretrieve, build_opener, install_opener
+from urllib.request import urlopen, urlretrieve, build_opener, install_opener
 
 try:
     import regex
