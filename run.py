@@ -91,7 +91,7 @@ default_settings = {
         {
             "name": "Purpur",
             "use": True,
-            "url": "https://api.purpurmc.org/v2/purpur/1.18.1/latest/download",
+            "url": "https://api.purpurmc.org/v2/purpur/1.18.2/latest/download",
             "dir": "",
             "regex": "Purpur-?.*\.jar",
             "mode": 1
