@@ -1,0 +1,3 @@
+[submodule "iris"]
+	path = plugins/Iris/iris
+	url = https://github.com/volmitsoftware/iris
