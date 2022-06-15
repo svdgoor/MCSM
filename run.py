@@ -115,7 +115,7 @@ default_settings = {
         {
             "name": "EssentialsX",
             "use": True,
-            "url": "https://github.com/EssentialsX/Essentials/releases/download/2.19.2/EssentialsX-2.19.2.jar",
+            "url": "https://github.com/EssentialsX/Essentials/releases/download/2.19.4/EssentialsX-2.19.4.jar",
             "dir": "plugins",
             "regex": "EssentialsX-?.*\.jar",
             "mode": 1
@@ -343,11 +343,11 @@ def install_files():
     # Check for eula.txt with the content "eula=true"
     install_file("eula.txt", "", "eula=true")
 
-    # Check for run.bat with the content "python " + this_file + " -Xmx1G -Xms1G\nPAUSE"
-    install_file("run.bat", "", "python " + os.path.basename(__file__) + " -Xmx8G -Xms8G\nPAUSE")
+    # Check for run.bat with the content "python " + this_file + " -Xmx8G -Xms8G\nPAUSE"
+    install_file(".run.bat", "", "python " + os.path.basename(__file__) + " -Xmx8G -Xms8G\nPAUSE")
 
-    # Check for update.bat with the content "python " + this_file + " -u\nPAUSE"
-    install_file("update.bat", "", "python " + os.path.basename(__file__) + " -u\nPAUSE")
+    # Check for update.bat with the content "python " + this_file + " -u -Xmx8G -Xms8G\nPAUSE"
+    install_file(".update.bat", "", "python " + os.path.basename(__file__) + " -u -Xmx8G -Xms8G\nPAUSE")
 
 # Cleanup directories
 def clean(clean_config: dict):
