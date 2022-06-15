@@ -1,3 +1,3 @@
-[submodule "plugins/Iris/repo"]
-	path = plugins/Iris/repo
+[submodule "Iris"]
+	path = Iris
 	url = https://github.com/VolmitSoftware/Iris.git

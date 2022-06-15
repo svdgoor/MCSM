@@ -78,7 +78,7 @@ default_settings = {
 
             "git_url": "https://github.com/VolmitSoftware/Iris.git",
             "git_branch": "master",
-            "git_repo_dir": "plugins/Iris/repo"
+            "git_repo_dir": "Iris"
         },
         {
             "name": "Rift",
