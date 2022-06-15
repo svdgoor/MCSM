@@ -344,7 +344,7 @@ def install_files():
     install_file("eula.txt", "", "eula=true")
 
     # Check for run.bat with the content "python " + this_file + " -Xmx1G -Xms1G\nPAUSE"
-    install_file("run.bat", "", "python " + os.path.basename(__file__) + " -Xmx1G -Xms1G\nPAUSE")
+    install_file("run.bat", "", "python " + os.path.basename(__file__) + " -Xmx8G -Xms8G\nPAUSE")
 
     # Check for update.bat with the content "python " + this_file + " -u\nPAUSE"
     install_file("update.bat", "", "python " + os.path.basename(__file__) + " -u\nPAUSE")
