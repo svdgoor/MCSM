@@ -344,10 +344,10 @@ def install_files():
     install_file("eula.txt", "", "eula=true")
 
     # Check for run.bat with the content "python " + this_file + " -Xmx8G -Xms8G\nPAUSE"
-    install_file(".run.bat", "", "python " + os.path.basename(__file__) + " -Xmx8G -Xms8G\nPAUSE")
+    install_file("run.bat", "", "python " + os.path.basename(__file__) + " -Xmx8G -Xms8G\nPAUSE")
 
     # Check for update.bat with the content "python " + this_file + " -u -Xmx8G -Xms8G\nPAUSE"
-    install_file(".update.bat", "", "python " + os.path.basename(__file__) + " -u -Xmx8G -Xms8G\nPAUSE")
+    install_file("update.bat", "", "python " + os.path.basename(__file__) + " -u -Xmx8G -Xms8G\nPAUSE")
 
 # Cleanup directories
 def clean(clean_config: dict):
