@@ -358,7 +358,7 @@ def install_files():
     install_file("update.bat", "", "python " + os.path.basename(__file__) + " -u -Xmx8G -Xms8G\nPAUSE")
 
     # Check for clean.bat with the content "python " + this_file + " -c\nPAUSE"
-    install_file("clean.bat", "", "python " + os.path.basename(__file__) + " -c\nPAUSE")
+    install_file("clean.bat", "", "python " + os.path.basename(__file__) + " -c")
 
 # Cleanup directories
 def clean(clean_config: dict):
