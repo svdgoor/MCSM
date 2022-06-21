@@ -47,7 +47,15 @@ default_settings = {
             "./world/playerdata",
             "./world/poi",
             "./world/region",
-            "./world/stats"
+            "./world/stats",
+            "./world_nether",
+            "./world_the_end",
+            "./versions",
+            "./plugins/BileTools",
+            "./plugins/bStats",
+            "./plugins/Essentials",
+            "./plugins/WorldEdit",
+            "./plugins/Rift"
         ],
         "files": [
             "version_history.json",
