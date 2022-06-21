@@ -91,7 +91,7 @@ default_settings = {
         {
             "name": "Purpur",
             "use": True,
-            "url": "https://api.purpurmc.org/v2/purpur/1.19.2/latest/download",
+            "url": "https://api.purpurmc.org/v2/purpur/1.19/latest/download",
             "dir": "",
             "regex": "Purpur-?.*\.jar",
             "mode": 1
@@ -349,9 +349,12 @@ def install_files():
     # Check for update.bat with the content "python " + this_file + " -u -Xmx8G -Xms8G\nPAUSE"
     install_file("update.bat", "", "python " + os.path.basename(__file__) + " -u -Xmx8G -Xms8G\nPAUSE")
 
+    # Check for clean.bat with the content "python " + this_file + " -c\nPAUSE"
+    install_file("clean.bat", "", "python " + os.path.basename(__file__) + " -c\nPAUSE")
+
 # Cleanup directories
 def clean(clean_config: dict):
-    if not clean_config["enabled"]:
+    if not clean_config["enabled"] and len([x for x in sys.argv if x == "-c"]) == 0:
         print("Skipping cleanup")
         return
 
@@ -378,6 +381,11 @@ if __name__ == "__main__":
 
     # Clean
     clean(config["clean"])
+
+    # If -c is in the arguments, stop
+    if len([x for x in sys.argv if x == "-c"]) > 0:
+        print("Cleaned up, exiting")
+        exit(0)
     
     # Install programs
     update_programs = len(sys.argv) > 1 and sys.argv[1] == "-u"
