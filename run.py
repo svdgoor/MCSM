@@ -82,7 +82,7 @@ default_settings = {
         },
         {
             "name": "Rift",
-            "use": True,
+            "use": False,
             "url": "https://github.com/VolmitSoftware/Rift/releases/download/1.0.1/Rift-1.0.1.jar",
             "dir": "plugins",
             "regex": "Rift-?.*\.jar",
@@ -91,7 +91,7 @@ default_settings = {
         {
             "name": "Purpur",
             "use": True,
-            "url": "https://api.purpurmc.org/v2/purpur/1.18.2/latest/download",
+            "url": "https://api.purpurmc.org/v2/purpur/1.19.2/latest/download",
             "dir": "",
             "regex": "Purpur-?.*\.jar",
             "mode": 1
