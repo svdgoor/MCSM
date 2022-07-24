@@ -86,7 +86,7 @@ default_settings = {
 
             "git_url": "https://github.com/VolmitSoftware/Iris.git",
             "git_branch": "master",
-            "git_repo_dir": "Iris"
+            "git_repo_dir": "plugins/Iris/repo"
         },
         {
             "name": "Rift",
@@ -293,6 +293,7 @@ def install_iris(program: dict, update: bool):
     # Check if the repo exists
     if not os.path.isdir(program_git_repo_dir):
         os.makedirs(program_git_repo_dir)
+    if not os.path.exists(program_git_repo_dir + "/gradlew.bat"):
         print("Setting up Iris repo")
         repo = Repo.clone_from(program_git_url, program_git_repo_dir)
         print("Cloned repository")
