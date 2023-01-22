@@ -16,8 +16,11 @@ pub async fn download_file_progress_bar(client: &Client, url: &str, path: &str, 
         .await
         .or(Err(format!("Failed to GET from '{}'", &url)))?;
     let total_size = res
-        .content_length()
-        .ok_or(format!("Failed to get content length from '{}'", &url))?;
+        .content_length().or(Some(u64::MAX)).unwrap();
+    let name = res.url().path_segments()
+        .and_then(|segments| segments.last())
+        .and_then(|s| if s.is_empty() { None } else { Some(s) })
+        .unwrap_or("");
     
     // Indicatif setup
     let pb = ProgressBar::new(total_size);
@@ -26,7 +29,8 @@ pub async fn download_file_progress_bar(client: &Client, url: &str, path: &str, 
         .progress_chars("#>-"));
 
     // download chunks
-    let mut file = File::create(path).or(Err(format!("Failed to create file '{}'", path)))?;
+    let target = path.to_owned() + "/" + url.split('/').last().unwrap();
+    let mut file = File::create(&target).or(Err(format!("Failed to create file '{}'", &target)))?;
     let mut downloaded: u64 = 0;
 
     while let Some(item) = res.chunk().await.unwrap() {
