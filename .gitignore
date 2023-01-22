@@ -1,7 +1,14 @@
-# Ignore everything
 *
 
 # Except for the following
 !LICENSE
 !README.md
 !run.py
+!src
+!src/**
+!Cargo.toml
+!server.toml
+
+
+# Added by cargo
+/target
