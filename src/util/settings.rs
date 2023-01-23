@@ -22,6 +22,7 @@ pub struct ServerSoftwareSettings {
     pub regex: String,
     pub download_url: String,
     pub reboot_delay: u32,
+    pub flags: Vec<String>,
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
@@ -36,14 +37,13 @@ pub struct CleanSettings {
 pub struct PluginSettings {
     pub name: String,
     pub enabled: bool,
-    pub regex: String,
     pub download_url: String,
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct IrisSettings {
+    pub name: String,
     pub enabled: bool,
-    pub regex: String,
     pub repo_url: String,
     pub repo_branch: String,
     pub repo_path: String,
@@ -57,6 +57,10 @@ fn generate_default_settings() -> Settings {
             regex: "purpur.*\\.jar".to_string(),
             download_url: "https://api.purpurmc.org/v2/purpur/1.19.3/latest/download".to_string(),
             reboot_delay: 5,
+            flags: vec![
+                "-Xmx4G".to_string(),
+                "-Xms4G".to_string(),
+            ]
         },
         clean: CleanSettings {
             enabled: false,
@@ -82,7 +86,6 @@ fn generate_default_settings() -> Settings {
                 "./world_nether".to_string(),
                 "./world_the_end".to_string(),
                 "./versions".to_string(),
-                "./plugins/*/*".to_string(),
             ],
             files: vec![
                 "version_history.json".to_string(),
@@ -105,31 +108,27 @@ fn generate_default_settings() -> Settings {
             PluginSettings {
                 name: "EssentialsX".to_string(),
                 enabled: true,
-                regex: "EssentialsX-?.*\\.jar".to_string(),
                 download_url: "https://github.com/EssentialsX/Essentials/releases/download/2.19.4/EssentialsX-2.19.4.jar".to_string(),
             },
             PluginSettings {
                 name: "WorldEdit".to_string(),
                 enabled: true,
-                regex: "WorldEdit-Bukkit?.*\\.jar".to_string(),
                 download_url: "https://dev.bukkit.org/projects/worldedit/files/latest".to_string(),
             },
             PluginSettings {
                 name: "BileTools".to_string(),
                 enabled: true,
-                regex: "BileTools-?.*\\.jar".to_string(),
                 download_url: "https://github.com/VolmitSoftware/BileTools/releases/download/2/BileTools-2.jar".to_string(),
             },
             PluginSettings {
                 name: "Rift".to_string(),
                 enabled: true,
-                regex: "Rift-?.*\\.jar".to_string(),
                 download_url: "https://github.com/VolmitSoftware/Rift/releases/download/1.0.1/Rift-1.0.1.jar".to_string(),
             },
         ],
         iris: IrisSettings {
             enabled: true,
-            regex: "Iris-?.*\\.jar".to_string(),
+            name: "Iris".to_string(),
             repo_url: "https://github.com/VolmitSoftware/Iris.git".to_string(),
             repo_branch: "master".to_string(),
             repo_path: "plugins/Iris/repo".to_string(),

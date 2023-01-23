@@ -1,3 +1,5 @@
+use async_std::path::Path;
+
 use crate::util::files;
 
 use super::settings::CleanSettings;
@@ -7,7 +9,7 @@ use super::settings::CleanSettings;
 
 pub async fn clean(settings: &CleanSettings) -> Result<(), String> {
     for folder in &settings.folders {
-        match files::delete_folder(&folder).await {
+        match files::delete_folder(folder).await {
             Ok(_) => {}
             Err(e) => {
                 println!("Failed to delete folder '{}': {}", folder, e);
@@ -15,12 +17,12 @@ pub async fn clean(settings: &CleanSettings) -> Result<(), String> {
         }
     }
     for file in &settings.files {
-        match files::delete_file(&file).await {
+        match files::delete_file(Path::new(file)).await {
             Ok(_) => {}
             Err(e) => {
                 println!("Failed to delete file '{}': {}", file, e);
             }
         }
     }
-    return Ok(());
+    Ok(())
 }
