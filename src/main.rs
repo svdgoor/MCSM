@@ -58,6 +58,12 @@ async fn main() {
     // Load settings
     let settings = Settings::load(&args.settings);
 
+    if args.excl_clean {
+        println!("Cleaning up temporary files... ");
+        cleaner::clean(&settings.clean).await.unwrap();
+        return;
+    }
+
     // Tasks
     let mut tasks: Vec<ServerTask> = Vec::new();
 
