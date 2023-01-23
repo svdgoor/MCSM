@@ -113,13 +113,28 @@ fn generate_default_settings() -> Settings {
             PluginSettings {
                 name: "WorldEdit".to_string(),
                 enabled: true,
-                download_url: "https://dev.bukkit.org/projects/worldedit/files/4162203/download".to_string(),
+                download_url: "https://mediafilez.forgecdn.net/files/4162/203/worldedit-bukkit-7.2.13.jar".to_string(),
             },
             PluginSettings {
                 name: "BileTools".to_string(),
                 enabled: true,
                 download_url: "https://github.com/VolmitSoftware/BileTools/releases/download/2/BileTools-2.jar".to_string(),
-            }
+            },
+            PluginSettings {
+                name: "ViaVersion".to_string(),
+                enabled: true,
+                download_url: "https://github.com/ViaVersion/ViaVersion/releases/download/4.5.1/ViaVersion-4.5.1.jar".to_string(),
+            },
+            PluginSettings {
+                name: "ViaBackwards".to_string(),
+                enabled: true,
+                download_url: "https://github.com/ViaVersion/ViaBackwards/releases/download/4.5.1/ViaBackwards-4.5.1.jar".to_string(),
+            },
+            PluginSettings {
+                name: "ViaRewind".to_string(),
+                enabled: true,
+                download_url: "https://ci.viaversion.com/view/ViaRewind/job/ViaRewind/lastSuccessfulBuild/artifact/all/target/ViaRewind-2.0.3-SNAPSHOT.jar".to_string(),
+            },
         ],
         iris: IrisSettings {
             enabled: true,
