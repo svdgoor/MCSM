@@ -108,23 +108,18 @@ fn generate_default_settings() -> Settings {
             PluginSettings {
                 name: "EssentialsX".to_string(),
                 enabled: true,
-                download_url: "https://github.com/EssentialsX/Essentials/releases/download/2.19.4/EssentialsX-2.19.4.jar".to_string(),
+                download_url: "https://ci.ender.zone/job/EssentialsX/lastSuccessfulBuild/artifact/jars/EssentialsX-2.20.0-dev+40-996285c.jar".to_string(),
             },
             PluginSettings {
                 name: "WorldEdit".to_string(),
                 enabled: true,
-                download_url: "https://dev.bukkit.org/projects/worldedit/files/latest".to_string(),
+                download_url: "https://dev.bukkit.org/projects/worldedit/files/4162203/download".to_string(),
             },
             PluginSettings {
                 name: "BileTools".to_string(),
                 enabled: true,
                 download_url: "https://github.com/VolmitSoftware/BileTools/releases/download/2/BileTools-2.jar".to_string(),
-            },
-            PluginSettings {
-                name: "Rift".to_string(),
-                enabled: true,
-                download_url: "https://github.com/VolmitSoftware/Rift/releases/download/1.0.1/Rift-1.0.1.jar".to_string(),
-            },
+            }
         ],
         iris: IrisSettings {
             enabled: true,
