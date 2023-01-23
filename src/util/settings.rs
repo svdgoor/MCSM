@@ -18,6 +18,7 @@ pub struct Settings {
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct ServerSoftwareSettings {
+    pub name: String,
     pub regex: String,
     pub download_url: String,
     pub reboot_delay: u32,
@@ -52,6 +53,7 @@ fn generate_default_settings() -> Settings {
     Settings {
         debug: false,
         server: ServerSoftwareSettings {
+            name: "purpur.jar".to_string(),
             regex: "purpur.*\\.jar".to_string(),
             download_url: "https://api.purpurmc.org/v2/purpur/1.19.3/latest/download".to_string(),
             reboot_delay: 5,
