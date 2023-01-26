@@ -8,7 +8,4 @@
 !src/**
 !Cargo.toml
 !server.toml
-
-
-# Added by cargo
-/target
+!*.bat
