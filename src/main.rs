@@ -1,7 +1,6 @@
 pub mod util;
 
 use std::process::{Command, Stdio};
-use std::thread;
 
 use async_std::fs::File;
 use async_std::io::WriteExt;
