@@ -223,18 +223,15 @@ fn task_iris(settings: IrisSettings, always_update: bool) -> ServerTask {
                 if !path_dep.exists().await {
                     println!("Setting up Iris repo dependencies");
                     let cwd = settings.repo_path.clone();
-                    thread::spawn(move || {
-                        let output = Command::new("cmd")
-                            .arg("/C")
-                            .arg("cd")
-                            .arg(cwd)
-                            .arg("&&")
-                            .arg("gradlew")
-                            .arg("setup")
-                            .stdout(Stdio::piped())
-                            .output().unwrap();
-                        println!("Output: {}", String::from_utf8_lossy(&output.stdout));
-                    });
+                    let output = Command::new("cmd")
+                        .arg("/C")
+                        .arg("cd")
+                        .arg(cwd)
+                        .arg("&&")
+                        .arg("gradlew")
+                        .arg("setup")
+                        .output().unwrap();
+                    println!("Output: {}", String::from_utf8_lossy(&output.stdout));
                 }
                 if !path_dep.exists().await {
                     println!("Error setting up Iris repo dependencies");
