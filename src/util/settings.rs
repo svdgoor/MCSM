@@ -68,6 +68,8 @@ fn generate_default_settings() -> Settings {
             folders: vec![
                 "./crash-reports".to_string(),
                 "./logs".to_string(),
+                "./config".to_string(),
+                "./iris".to_string(),
                 "./w".to_string(),
                 "./v".to_string(),
                 "./x".to_string(),
@@ -102,6 +104,9 @@ fn generate_default_settings() -> Settings {
                 "./world/level.dat_old".to_string(),
                 "./world/session.lock".to_string(),
                 "./world/uid.dat".to_string(),
+                "pufferfish.yml".to_string(),
+                "purpur.yml".to_string(),
+                "spigot.yml".to_string(),
             ]
         },
         plugins: vec![
