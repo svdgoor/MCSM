@@ -45,8 +45,9 @@ jobs:
         token: ${{ secrets.GITHUB_TOKEN }} # The token to use to authenticate with Github
         allowUpdates: true # Allow the release to be updated
         generateReleaseNotes: true # Generate release notes from the commits
-        draft: true # If the release should be a draft
+        draft: false # If the release should be a draft
         prerelease: true # If the release should be a pre-release
+        makeLatest: false # If the release should be marked as the latest release
         artifactErrorsFailBuild: true # If the build should fail if the artifact cannot be added to the release
         updateOnlyUnreleased: true # If the build should fail if the release is not a draft or pre-release
       
@@ -57,107 +58,3 @@ jobs:
         name: "${{ env.RELEASE_NAME_WIN }}.exe"
         path: "${{ env.OUTPUT_DIR }}/${{ env.RELEASE_NAME_WIN }}.exe"
         retention-days: 5
-
-  build_and_release_linux:
-    name: Build and Release Linux
-
-    runs-on: ubuntu-latest
-
-    env:
-      RELEASE_NAME_LINUX: "${{ github.event.repository.name }}-${{ github.ref_name }}-Linux"
-      OUTPUT_DIR: "./target/release"
-
-    steps:
-    - uses: actions/checkout@v3 # Same as with Windows
-
-    # Install required tools for Linux
-    - name: Install required tools
-      run: sudo apt install libdbus-1-dev pkg-config libudev-dev
-
-    - name: Build Release # Same as with Windows
-      run: cargo build --release
-
-    - name: Rename Artifact # Same as with Windows
-      run: mv ${{ env.OUTPUT_DIR }}/${{ env.OUTPUT_NAME }} ${{ env.OUTPUT_DIR }}/${{ env.RELEASE_NAME_LINUX }}
-      
-    - name: Add Artifact To Github Release # Same as with Windows
-      uses: ncipollo/release-action@v1
-      with:
-        artifacts: "${{ env.OUTPUT_DIR }}/${{ env.RELEASE_NAME_LINUX }}"
-        replacesArtifacts: false
-        token: ${{ secrets.GITHUB_TOKEN }}
-        allowUpdates: true
-        generateReleaseNotes: true
-        draft: true
-        prerelease: true
-        artifactErrorsFailBuild: true
-        updateOnlyUnreleased: true
-
-    - name: Add Artifact To Action Job # Same as with Windows
-      uses: actions/upload-artifact@v3
-      with:
-        name: "${{ env.RELEASE_NAME_LINUX }}"
-        path: "${{ env.OUTPUT_DIR }}/${{ env.RELEASE_NAME_LINUX }}"
-        retention-days: 5
-      
-  build_and_release_macos:
-    name: Build and Release MacOS
-
-    runs-on: macos-latest
-
-    env:
-      RELEASE_NAME_MACOS: "${{ github.event.repository.name }}-${{ github.ref_name }}-MacOS"
-      OUTPUT_DIR: "./target/aarch64-apple-darwin/release"
-
-    steps:
-    - uses: actions/checkout@v3 # Same as with Windows
-
-    # Install required target for MacOS
-    - name: Install required target
-      run: rustup target add aarch64-apple-darwin
-
-    - name: Build Release # Same as with Windows
-      run: cargo build --verbose --release --target=aarch64-apple-darwin # We need to specify the target for MacOS
-
-    - name: Rename Artifact # Same as with Windows
-      run: mv ${{ env.OUTPUT_DIR }}/${{ env.OUTPUT_NAME }} ${{ env.OUTPUT_DIR }}/${{ env.RELEASE_NAME_MACOS }}
-
-    - name: Add Artifact To Github Release # Same as with Windows
-      uses: ncipollo/release-action@v1
-      with:
-        artifacts: "${{ env.OUTPUT_DIR }}/${{ env.RELEASE_NAME_MACOS }}"
-        replacesArtifacts: false
-        token: ${{ secrets.GITHUB_TOKEN }}
-        allowUpdates: true
-        generateReleaseNotes: true
-        draft: true
-        prerelease: true
-        artifactErrorsFailBuild: true
-        updateOnlyUnreleased: true
-
-    - name: Add Artifact To Action Job # Same as with Windows
-      uses: actions/upload-artifact@v3
-      with:
-        name: "${{ env.RELEASE_NAME_MACOS }}"
-        path: "${{ env.OUTPUT_DIR }}/${{ env.RELEASE_NAME_MACOS }}"
-        retention-days: 5
-
-  release:
-    name: Release
-
-    # Depends on the build jobs
-    needs: [build_and_release_windows, build_and_release_linux, build_and_release_macos]
-
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Release Github Release
-      uses: ncipollo/release-action@v1
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        allowUpdates: true
-        makeLatest: false # Prevent the release from being marked as latest
-        updateOnlyUnreleased: true
-        draft: false # The release is no longer a draft
-        prerelease: true
-        generateReleaseNotes: true
