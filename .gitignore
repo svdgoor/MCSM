@@ -9,3 +9,5 @@
 !Cargo.toml
 !server.toml
 !*.bat
+!plugins/Iris/packs/overworld
+!plugins/Iris/Iris
