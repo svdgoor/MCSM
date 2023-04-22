@@ -9,7 +9,6 @@ pub fn default_settings() -> String {
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Settings {
-    pub debug: bool,
     pub server: ServerSoftwareSettings,
     pub clean: CleanSettings,
     pub plugins: Vec<PluginSettings>,
@@ -51,7 +50,6 @@ pub struct IrisSettings {
 
 fn generate_default_settings() -> Settings { 
     Settings {
-        debug: false,
         server: ServerSoftwareSettings {
             name: "purpur.jar".to_string(),
             regex: "purpur.*\\.jar".to_string(),
