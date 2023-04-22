@@ -18,18 +18,18 @@ use crate::util::web::download_file_progress_bar;
 
 #[derive(Parser)]
 struct Cli {
-    /// Activate debug mode
-    #[arg(short, long, default_value_t = false)]
-    debug: bool,
     /// Full update
     #[arg(short, long, default_value_t = false)]
     update: bool,
     /// Clean up temporary files
     #[arg(short, long, default_value_t = false)]
     clean: bool,
-    /// Clean exclusively
+    /// Clean exclusively, without updating
     #[arg(short, long, default_value_t = false)]
     excl_clean: bool,
+    /// Clean exclusively deep, removing all gitignored files
+    #[arg(short, long, default_value_t = false)]
+    deep_excl_clean: bool,
     /// Re-build Iris distr
     #[arg(long, default_value_t = false)]
     update_iris: bool,
@@ -57,7 +57,11 @@ async fn main() {
     // Load settings
     let settings = Settings::load(&args.settings);
 
-    if args.excl_clean {
+    if args.deep_excl_clean {
+        println!("Deep cleaning files... ");
+        cleaner::clean_deep().unwrap();
+        return;
+    } else if args.excl_clean {
         println!("Cleaning up temporary files... ");
         cleaner::clean(&settings.clean).await.unwrap();
         return;
@@ -192,7 +196,7 @@ fn task_iris(settings: IrisSettings, always_update: bool) -> ServerTask {
                 // Check repo directory
                 let path = Path::new(&settings.repo_path);
                 if !path.exists().await {
-                    println!("Cloning Iris");
+                    println!("Cloning Iris into {}", &settings.repo_path);
                     match git::clone(&settings.repo_url, &settings.repo_path).await {
                         Ok(_) => {}
                         Err(e) => {
@@ -221,14 +225,14 @@ fn task_iris(settings: IrisSettings, always_update: bool) -> ServerTask {
                 let path_dep = Path::new(&ps);
                 if !path_dep.exists().await {
                     println!("Setting up Iris repo dependencies");
-                    let cwd = settings.repo_path.clone();
                     let output = Command::new("cmd")
                         .arg("/C")
                         .arg("cd")
-                        .arg(cwd)
+                        .arg(&settings.repo_path)
                         .arg("&&")
                         .arg("gradlew")
                         .arg("setup")
+                        .stdout(Stdio::piped())
                         .output().unwrap();
                     println!("Output: {}", String::from_utf8_lossy(&output.stdout));
                 }
