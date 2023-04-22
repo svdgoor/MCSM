@@ -1,13 +1,26 @@
+# Everything
 *
 
 # Except for the following
-!LICENSE
-!README.md
-!run.py
+
+## Source code
 !src
 !src/**
+
+# The cargo files
 !Cargo.toml
-!server.toml
+
+## Github workflows
+!.github
+!.github/**
+
+## Batch scripts
 !*.bat
+
+## The license and readme
+!LICENSE
+!README.md
+
+## The submodules
 !plugins/Iris/packs/overworld
 !plugins/Iris/Iris
