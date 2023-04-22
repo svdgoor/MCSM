@@ -53,7 +53,7 @@ fn generate_default_settings() -> Settings {
         server: ServerSoftwareSettings {
             name: "purpur.jar".to_string(),
             regex: "purpur.*\\.jar".to_string(),
-            download_url: "https://api.purpurmc.org/v2/purpur/1.19.3/latest/download".to_string(),
+            download_url: "https://api.purpurmc.org/v2/purpur/1.19.4/latest/download".to_string(),
             reboot_delay: 5,
             flags: vec![
                 "-Xmx4G".to_string(),
@@ -65,7 +65,6 @@ fn generate_default_settings() -> Settings {
             also_on_reboot: false,
             folders: vec![
                 "./crash-reports".to_string(),
-                "./logs".to_string(),
                 "./config".to_string(),
                 "./iris".to_string(),
                 "./w".to_string(),
