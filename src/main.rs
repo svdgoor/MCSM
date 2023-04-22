@@ -216,7 +216,7 @@ fn task_iris(settings: IrisSettings, always_update: bool) -> ServerTask {
                     Ok(_) => {}
                     Err(e) => {
                         println!("Error pulling latest changes: {}", e);
-                        return;
+                        println!("We will try to build anyway, but this may fail");
                     }
                 }
 

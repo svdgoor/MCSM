@@ -40,6 +40,7 @@ pub fn checkout(path: &str, branch: &str) -> Result<(), String> {
 pub fn pull(path: &str) -> Result<(), String> {
     match Command::new("git")
         .arg("pull")
+        .arg("master")
         .current_dir(path)
         .output() {
         Ok(output) => {
