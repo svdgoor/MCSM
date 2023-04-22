@@ -11,37 +11,9 @@ A manager for using many different server versions
 - Easy configurability
 
 ## Install
-To install, just unzip [this](https://github.com/CocoTheOwner/Server-Manager/archive/refs/heads/main.zip) in your main server directory.
-You will also need a version of [Python](https://www.python.org/). To make this, I used [Python 3.9.5](https://www.python.org/ftp/python/3.9.5/python-3.9.5-amd64.exe).
+To install download the latest release from the [releases page](https://github.com/CocoTheOwner/MCSM/releases/latest).
 
-## Configuration
-There are 3 parts to configure
-
-#### Java
-By default, Server Manager uses the following paths:
-```
-    11: "C:\Program Files\Java\jdk-11.0.10\\bin\java.exe",
-    16: "C:\Program Files\Java\jdk-16.0.1\\bin\java.exe"
-```
-You can modify these in `s.py` by modifying the paths in the `javaPaths` dictionary. Ensure to use `\\` for directories.
-
-#### Wiping
-By default, Server Manager does not wipe your server clean every time you launch.
-Wiping clean means removing any temporary file (worlds, logs, crashlogs, etc.).
-The cleaner keeps your plugin configs, `eula`, `spigot/bukkit/paper/etc.yml`.
-You can enable the cleaner by going into `s.py`, and replacing `clean = False` with `clean = True`.
-You can also remove and add files from the blacklists (the files that are removed), right below, under `cleanfolders` and `cleanfiles`.
-
-#### Flags
-By default, Server Manager uses the following flags: `-Xms4G -Xmx4G`. You can modify these by editing the `flags` variable in `s.py`
-
-## Add server jar
-To add a new server version, add any server `.jar` to the `*/versions` folder. 
-It will then show up after running the startup `x.bat`.
-You do not have to rename server jars.
-
-## Running
-You can run Server Manager by either running the `x.bat` file.
-You can also open the command prompt and use `x`, `./x` or `py s.py`.
-You will be prompted to select a version.
-Upon selection, the server will run.
+# Running
+Just doubleclick the executable.
+You can also input a few command line inputs. Documentation for that can be found when adding the `-h` flag when you run the executable from a terminal.
+Lastly, after running the executable, a `settings.toml` file will appear in the directory. You can edit this to get full customization.
