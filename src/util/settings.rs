@@ -146,7 +146,7 @@ fn generate_default_settings() -> Settings {
             name: "Iris".to_string(),
             repo_url: "https://github.com/VolmitSoftware/Iris.git".to_string(),
             repo_branch: "master".to_string(),
-            repo_path: "plugins/Iris/repo".to_string(),
+            repo_path: "plugins/Iris/Iris".to_string(),
         }
     }
 }
