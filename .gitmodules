@@ -1,0 +1,6 @@
+[submodule "plugins/Iris/packs/overworld"]
+	path = plugins/Iris/packs/overworld
+	url = https://github.com/IrisDimensions/overworld
+[submodule "plugins/Iris/Iris"]
+	path = plugins/Iris/Iris
+	url = https://github.com/volmitSoftware/Iris
