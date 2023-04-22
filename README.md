@@ -1,15 +1,6 @@
 # Minecraft Server Manager
 A manager for using many different server versions
  
-## Benefits & features
-- No need to rename jarfiles
-- No need to change startup batches for a jarfile
-- No need to have multiple batch files for different versions
-- No more hassle with switching java versions
-- Full server wiping options & configurability
-- Startup flag support
-- Easy configurability
-
 ## Install
 To install download the latest release from the [releases page](https://github.com/CocoTheOwner/MCSM/releases/latest).
 
