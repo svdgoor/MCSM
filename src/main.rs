@@ -194,6 +194,7 @@ fn task_iris(settings: IrisSettings, always_update: bool) -> ServerTask {
             task: task::spawn(async move {
 
                 // Check repo directory
+                println!("Checking Iris repo directory {}", &settings.repo_path);
                 let path = Path::new(&settings.repo_path);
                 if !path.exists().await {
                     println!("Cloning Iris into {}", &settings.repo_path);
